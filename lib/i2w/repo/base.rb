@@ -9,7 +9,7 @@ module I2w
           ActiveRecord::Base.transaction(&block)
         end
 
-        # TODO: Query objects
+        # TODO: Query objects, which are instances of a query monad (all read only)
         def all
           record_class.all.map { |record| to_model(record.attributes) }
         end

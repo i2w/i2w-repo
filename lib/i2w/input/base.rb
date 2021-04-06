@@ -15,12 +15,12 @@ module I2w
         super
       end
 
-      def attributes
+      def to_hash
         raise InvalidAttributesError unless valid?
 
-        instance_values.symbolize_keys.slice(*self.class.attribute_names)
+        super
       end
-      alias to_hash attributes
+      alias attributes to_hash
     end
   end
 end

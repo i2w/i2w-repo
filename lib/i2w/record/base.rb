@@ -6,10 +6,10 @@ module I2w
     class Base < ActiveRecord::Base
       self.abstract_class = true
 
-      # apply any mixins/extensions
+      # apply any concerns
       def self.inherited(subclass)
         super
-        subclass.extend Record::DefaultTableNameExtension
+        subclass.include Concerns::TableName
       end
     end
   end
