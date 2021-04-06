@@ -6,6 +6,10 @@ gemspec
 
 group :development do
   gem 'sqlite3'
+
+  # TODO: once below are gems, move them to the gemspec
+  gem 'i2w-data_object', github: 'i2w/i2w-data_object', branch: 'main'
+  gem 'i2w-result', github: 'i2w/i2w-result', branch: 'main'
 end
 
 # To use a debugger
