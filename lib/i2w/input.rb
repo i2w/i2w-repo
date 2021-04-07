@@ -1,18 +1,33 @@
 # frozen_string_literal: true
 
-require 'active_support/core_ext/object/instance_variables'
 require 'active_model'
 require 'i2w/data_object'
-require 'i2w/input/base'
 
 module I2w
-  module Input
+  # Input base class.
+  class Input < DataObject::Mutable
+    extend ActiveModel::Callbacks
+    include ActiveModel::Conversion
+    include ActiveModel::Validations
+    include ActiveModel::Validations::Callbacks
+
     class Error < RuntimeError; end
 
     class InvalidAttributesError < Error; end
 
     class ValidationContextUnsupportedError < Error; end
+
+    def valid?(context = nil)
+      raise ValidationContextUnsupportedError unless context.nil?
+
+      super
+    end
+
+    def to_hash
+      raise InvalidAttributesError unless valid?
+
+      super
+    end
+    alias attributes to_hash
   end
 end
-
-

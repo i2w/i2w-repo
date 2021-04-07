@@ -4,10 +4,10 @@ require 'test_helper'
 
 module I2w
   class RecordTest < ActiveSupport::TestCase
-    class FooRecord < Record::Base
+    class FooRecord < Record
     end
 
-    class BarRecord < Record::Base
+    class BarRecord < Record
       self.table_name = 'bar_bars'
     end
 

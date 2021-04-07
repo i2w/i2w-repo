@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 require 'bundler/setup'
 require 'minitest/autorun'
-require 'active_model'
+require 'active_support'
 
-require_relative '../lib/i2w/repo'
+require 'i2w/repo'

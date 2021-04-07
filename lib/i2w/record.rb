@@ -1,10 +1,28 @@
 # frozen_string_literal: true
 
 require 'active_record'
-require 'i2w/record/concerns/table_name'
-require 'i2w/record/base'
 
 module I2w
-  module Record
+  # record base class
+  class Record < ActiveRecord::Base
+    self.abstract_class = true
+
+    # apply any concerns
+    def self.inherited(subclass)
+      super
+      subclass.extend TableName
+    end
+
+    # table name extension
+    module TableName
+      # remove '_records' suffix from computed table_name
+      def table_name
+        unless defined?(@table_name)
+          super
+          @table_name = @table_name.sub(/_records\z/, '').pluralize if @table_name.match?(/_records\z/)
+        end
+        @table_name
+      end
+    end
   end
 end

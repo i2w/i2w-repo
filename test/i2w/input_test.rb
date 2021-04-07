@@ -4,7 +4,7 @@ require 'test_helper'
 
 module I2w
   class InputTest < ActiveSupport::TestCase
-    class FooInput < Input::Base
+    class FooInput < Input
       attribute :foo
 
       validates :foo, presence: true, format: /bar/

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module I2w
-  module Repo
+  class Repo
     # Utility to wrap an active record operation in a result.
     # It converts some active record errors into failures with useful errors
     module ActiveRecordResult
