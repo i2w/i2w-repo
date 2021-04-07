@@ -14,9 +14,13 @@ module I2w
   class Repo
     class << self
       def transaction(&block)
-        # we expect transactions to be nested, we pass `requires_new: true`
-        # @see https://api.rubyonrails.org/classes/ActiveRecord/Transactions/ClassMethods.html#module-ActiveRecord::Transactions::ClassMethods-label-Nested+transactions
-        ActiveRecord::Base.transaction(requires_new: true, &block)
+        # we expect transactions to be nested, so we set sane defaults for this
+        # @see https://makandracards.com/makandra/42885-nested-activerecord-transaction-pitfalls
+        ActiveRecord::Base.transaction(joinable: false, requires_new: true, &block)
+      end
+
+      def rollback!
+        raise ActiveRecord::Rollback
       end
 
       # TODO: Query objects, which are instances of a query monad (all read only)
