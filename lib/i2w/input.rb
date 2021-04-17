@@ -29,5 +29,9 @@ module I2w
       super
     end
     alias attributes to_hash
+
+    def persisted?
+      false
+    end
   end
 end
