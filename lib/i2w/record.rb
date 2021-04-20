@@ -7,21 +7,14 @@ module I2w
   class Record < ActiveRecord::Base
     self.abstract_class = true
 
-    # apply any concerns
-    def self.inherited(subclass)
-      super
-      subclass.extend TableName
-    end
+    class << self
+      private
 
-    # table name extension
-    module TableName
       # remove '_records' suffix from computed table_name
-      def table_name
-        unless defined?(@table_name)
-          super
-          @table_name = @table_name.sub(/_records\z/, '').pluralize if @table_name.match?(/_records\z/)
-        end
-        @table_name
+      def compute_table_name
+        computed = super
+        computed = computed.sub(/_records\z/, '').pluralize if computed.match?(/_records\z/)
+        computed
       end
     end
   end

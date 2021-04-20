@@ -7,13 +7,21 @@ module I2w
     class FooRecord < Record
     end
 
-    class BarRecord < Record
-      self.table_name = 'bar_bars'
+    class Abstract < Record
+      self.abstract_class = true
+    end
+
+    class BarRecord < Abstract
+    end
+
+    class BazRecord < Record
+      self.table_name = 'bazzes'
     end
 
     test 'table_name defaults to standard active record table name, but can be overridden' do
       assert_equal 'foos', FooRecord.table_name
-      assert_equal 'bar_bars', BarRecord.table_name
+      assert_equal 'bars', BarRecord.table_name
+      assert_equal 'bazzes', BazRecord.table_name
     end
   end
 end
