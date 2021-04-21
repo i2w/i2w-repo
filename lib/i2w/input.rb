@@ -22,6 +22,12 @@ module I2w
       super(**to_attributes_hash(hash_object))
     end
 
+    # sometimes we need to transfer errors from after validation, such as db contraint errors
+    def errors=(other)
+      errors.clear
+      errors.copy!(other)
+    end
+
     def valid?(context = nil)
       raise ValidationContextUnsupportedError unless context.nil?
 
