@@ -25,40 +25,34 @@ module I2w
 
       # TODO: Query objects, which are instances of a query monad (all read only)
       def all
-        record_class.all.map { |record| to_model(record.attributes) }
+        record_class.all.map { to_model _1 }
       end
 
       def create(input)
         active_record_result do
-          record = record_class.create!(**input)
-          to_model(record.attributes)
+          to_model record_class.create!(**input)
         end
       end
 
       def find(id)
         active_record_result do
-          record = record_class.find(id)
-          to_model(record.attributes)
+          to_model record_class.find(id)
         end
       end
 
       def update(id, input)
         active_record_result do
-          transaction do
-            record = record_class.find(id)
-            record.update!(**input)
+          to_model transaction do
+            record_class.find(id).update!(**input)
           end
-          to_model(record.attributes)
         end
       end
 
       def delete(id)
         active_record_result do
-          transaction do
-            record = record_class.find(id)
-            record.destroy!
+          to_model transaction do
+            record_class.find(id).destroy!
           end
-          to_model(record.attributes)
         end
       end
 
@@ -74,8 +68,8 @@ module I2w
 
         private
 
-      def to_model(attributes)
-        model_class.new(**attributes.symbolize_keys)
+      def to_model(record)
+        model_class.new(**record.attributes.symbolize_keys)
       end
 
       def active_record_result(...)
