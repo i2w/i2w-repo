@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/i2w/i2w-data_object.git
-  revision: d5c1f62f7b9d28d7318e9d2e4ee5a10fedf1f994
+  revision: f29ea47a82a36bde66355395214a3a3ad9a95a5c
   branch: main
   specs:
     i2w-data_object (0.1.0)

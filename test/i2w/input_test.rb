@@ -25,5 +25,10 @@ module I2w
       assert_raises(Input::InvalidAttributesError) { input.attributes }
       assert_raises(Input::InvalidAttributesError) { { **input } }
     end
+
+    test 'unknown, empty or partial input via #new creates an Input' do
+      input = FooInput.new(xxx: 'xxx')
+      refute input.valid?
+    end
   end
 end

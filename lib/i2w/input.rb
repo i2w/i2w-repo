@@ -17,6 +17,11 @@ module I2w
 
     class ValidationContextUnsupportedError < Error; end
 
+    # we are more permissive with input than a standard DataObject
+    def self.new(**kwargs)
+      super **to_attributes_hash(kwargs)
+    end
+
     def valid?(context = nil)
       raise ValidationContextUnsupportedError unless context.nil?
 
