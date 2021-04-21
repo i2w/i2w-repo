@@ -25,7 +25,7 @@ module I2w
 
       # TODO: Query objects, which are instances of a query monad (all read only)
       def all
-        record_class.all.map { |record| to_model record }
+        record_class.all.map { to_model _1 }
       end
 
       def create(input)
@@ -42,14 +42,14 @@ module I2w
 
       def update(id, input)
         active_record_result do
-          record = transaction { record_class.find(id).update!(**input) }
+          record = transaction { record_class.find(id).tap { _1.update!(**input) } }
           to_model record
         end
       end
 
-      def delete(id)
+      def destroy(id)
         active_record_result do
-          record = transaction { record_class.find(id).destroy! }
+          record = transaction { record_class.find(id).tap(&:destroy!) }
           to_model record
         end
       end
