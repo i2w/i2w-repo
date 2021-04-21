@@ -30,6 +30,11 @@ module I2w
       assert_equal 'i2w/model_test/persisted_foos/persisted_foo', foo.to_partial_path
       assert_equal foo, foo.to_model
     end
+
+    test 'ActiveModel::Naming' do
+      assert_equal 'Bar', Bar.model_name.human
+      assert_equal 'Persisted foo', PersistedFoo.model_name.human
+    end
   end
 end
 

@@ -7,7 +7,7 @@ module I2w
   # base model class, an immutable data object with your app specific behaviour, but no database behaviour, nor
   # input/validation behaviour.  Typically instantiated by a Repo singleton object for persisted models.
   #
-  # includes ActiveModel::Conversion
+  # includes ActiveModel Conversion and Naming
   #
   # it is anticipated that you will create your own application model for persisted classes as follows:
   #
@@ -17,6 +17,7 @@ module I2w
   #
   # You may create aggregate, or non persisted models by inheriting from I2w::Model, or adding another base class
   class Model < DataObject::Immutable
+    extend ActiveModel::Naming
     include ActiveModel::Conversion
 
     def persisted?
