@@ -6,6 +6,7 @@ gemspec
 
 group :development do
   gem 'sqlite3'
+  gem 'minitest-autotest'
 
   # TODO: once below are gems, move them to the gemspec
   gem 'i2w-data_object', github: 'i2w/i2w-data_object', branch: 'main'

@@ -1,13 +1,13 @@
 GIT
   remote: https://github.com/i2w/i2w-data_object.git
-  revision: b716e194920b392d307854e38588a941571f1e1f
+  revision: d5c1f62f7b9d28d7318e9d2e4ee5a10fedf1f994
   branch: main
   specs:
     i2w-data_object (0.1.0)
 
 GIT
   remote: https://github.com/i2w/i2w-result.git
-  revision: 3e5feb592f49aa92fea1295f668f057a46e63f35
+  revision: 2a1288e201532fc7f66a64e456878bb6e083c440
   branch: main
   specs:
     i2w-result (0.1.0)
@@ -35,6 +35,12 @@ GEM
     i18n (1.8.10)
       concurrent-ruby (~> 1.0)
     minitest (5.14.4)
+    minitest-autotest (1.1.1)
+      minitest-server (~> 1.0)
+      path_expander (~> 1.0)
+    minitest-server (1.0.6)
+      minitest (~> 5.0)
+    path_expander (1.1.0)
     rake (13.0.3)
     sqlite3 (1.4.2)
     tzinfo (2.0.4)
@@ -49,6 +55,7 @@ DEPENDENCIES
   i2w-data_object!
   i2w-repo!
   i2w-result!
+  minitest-autotest
   rake (>= 13.0.3)
   sqlite3
 
