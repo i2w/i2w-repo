@@ -1,11 +1,15 @@
 # frozen_string_literal: true
 
+require 'active_model/errors'
+
 module I2w
   class Repo
     # Utility to wrap an active record operation in a result.
     # It converts some active record errors into failures with useful errors
-    module ActiveRecordResult
-      extend self
+    class ActiveRecordResult
+      def initialize(errors_base = Input.new)
+        @errors_base = errors_base
+      end
 
       # yields the block and returns the result in Result.success monad
       # Rescues a variety of active record errors and returns appropriate Result.failure monads
@@ -22,22 +26,24 @@ module I2w
       private
 
       def not_found_failure(exception)
-        Result.failure :not_found, id: [exception.message]
+        Result.failure :not_found, error(:id, :not_found)
       end
 
       def presence_failure(exception)
-        attribute = (exception.message[/\w+\.(\w+)/, 1] || :unknown).to_sym
-
-        Result.failure :db_constraint, attribute => ["can't be blank"]
+        # currently only works in postgres
+        attribute = exception.message[/column "(\w+)"/, 1] || 'unknown'
+        Result.failure :db_constraint, error(attribute, :blank)
       end
 
       def uniqueness_failure(exception)
-        attributes = exception.message.scan(/\w+\.(\w+)/).flatten
-        *scope, attribute = attributes
-        message = 'is taken'
-        message = "#{message} in scope #{scope.join(', ')}"
+        # currently only works for postgres
+        attribute = exception.message[/Key .*?(\w+)\)?=/, 1] || 'unknown'
+        Result.failure :db_constraint, error(attribute, :taken)
+      end
 
-        Result.failure :db_constraint, attribute => [message]
+      def error(attribute, error)
+        @errors_base.errors.add(attribute, error)
+        @errors_base.errors
       end
     end
   end

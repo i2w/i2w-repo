@@ -54,15 +54,13 @@ module I2w
         end
       end
 
-      attr_writer :model_class, :record_class
+      attr_writer :model_class, :input_class, :record_class
 
-      def model_class
-        @model_class ||= associated_class('') # model classes have no suffix
-      end
+      def model_class = @model_class ||= associated_class('')
 
-      def record_class
-        @record_class ||= associated_class('Record')
-      end
+      def input_class = @input_class ||= associated_class('Input')
+
+      def record_class = @record_class ||= associated_class('Record')
 
       private
 
@@ -70,8 +68,8 @@ module I2w
         model_class.new(**record.attributes.symbolize_keys)
       end
 
-      def active_record_result(...)
-        ActiveRecordResult.call(...)
+      def active_record_result(&block)
+        ActiveRecordResult.new(input_class.new).call(&block)
       end
 
       def associated_class(suffix)
