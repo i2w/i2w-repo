@@ -7,6 +7,11 @@ module I2w
   class Record < ActiveRecord::Base
     self.abstract_class = true
 
+    def to_hash
+      attributes.symbolize_keys
+    end
+    alias to_h to_hash
+
     class << self
       private
 

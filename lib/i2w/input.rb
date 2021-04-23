@@ -34,6 +34,7 @@ module I2w
       super
     end
 
+    # we raise an error if we attempt to access attributes on an invalid object
     def to_hash
       raise InvalidAttributesError unless valid?
 
