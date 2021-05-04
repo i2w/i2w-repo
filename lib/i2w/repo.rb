@@ -38,8 +38,6 @@ module I2w
       end
     end
 
-    delegate :model_class, :record_class, to: 'self.class', private: true
-
     def transaction(&block)
       # we expect transactions to be nested, so we set sane defaults for this
       # @see https://makandracards.com/makandra/42885-nested-activerecord-transaction-pitfalls
@@ -78,6 +76,10 @@ module I2w
     end
 
     private
+
+    def model_class = self.class.model_class
+
+    def record_class = self.class.record_class
 
     def to_model(record)
       attributes_to_model(**record)

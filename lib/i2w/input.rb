@@ -18,13 +18,12 @@ module I2w
     class ValidationContextUnsupportedError < Error; end
 
     # we are more permissive with input than a standard DataObject
-    def self.new(hash_object = {})
-      super(**to_attributes_hash(hash_object))
+    def self.new(object = {})
+      super(**to_attributes_hash(object))
     end
 
     # sometimes we need to transfer errors from after validation, such as db contraint errors
     def errors=(other)
-      errors.clear
       errors.copy!(other)
     end
 

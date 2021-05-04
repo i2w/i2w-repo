@@ -6,6 +6,7 @@ module I2w
   class InputTest < ActiveSupport::TestCase
     class FooInput < Input
       attribute :foo
+      attribute :faz
 
       validates :foo, presence: true, format: { with: /bar/, allow_blank: true }
     end
@@ -14,8 +15,8 @@ module I2w
       input = FooInput.new(foo: 'bar bar black sheep')
 
       assert input.valid?
-      assert_equal({ foo: 'bar bar black sheep' }, input.attributes)
-      assert_equal({ foo: 'bar bar black sheep' }, { **input })
+      assert_equal({ foo: 'bar bar black sheep', faz: nil }, input.attributes)
+      assert_equal({ foo: 'bar bar black sheep', faz: nil }, { **input })
     end
 
     test 'invalid input' do
@@ -43,5 +44,15 @@ module I2w
       input.errors = other.errors
       assert_equal({ foo: [{ error: :blank }] }, input.errors.details)
     end
+
+    test 'how to patch an input' do
+      existing = FooInput.new(foo: 'bar', faz: 'baz')
+
+      patched_by_hash = FooInput.new(**existing, **{ 'faz' => 'BAZ' })
+      patched_by_kwargs = FooInput.new(**existing, faz: 'BAZ')
+
+      assert_equal({ foo: 'bar', faz: 'BAZ' }, patched_by_hash.attributes)
+      assert_equal({ foo: 'bar', faz: 'BAZ' }, patched_by_kwargs.attributes)
+     end
   end
 end
