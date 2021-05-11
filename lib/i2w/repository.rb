@@ -2,7 +2,7 @@
 
 require 'active_record'
 
-require_relative 'repo/associated_class'
+require_relative 'repo/associated_class_accessor'
 require_relative 'model'
 require_relative 'record'
 
@@ -11,7 +11,9 @@ module I2w
   # Repository methods return models, raise ActiveRecord errors, and are quite simple to write.
   # By convention they use named arguments id:, and input: for CRUD methods
   class Repository
-    extend Repo.associated_class_extension :record, model: -> { name.sub(/Repository\z/, '').constantize }
+    extend Repo::AssociatedClassAccessor
+
+    associated_class_accessor :record, model: -> { name.sub(/Repository\z/, '').constantize }
 
     # TODO: Query objects, which are instances of a query monad (all read only)
     def all
