@@ -20,6 +20,8 @@ module I2w
     extend ActiveModel::Naming
     include ActiveModel::Conversion
 
+    def self.model_class = self
+
     def persisted?
       false
     end

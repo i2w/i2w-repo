@@ -1,9 +1,16 @@
 GIT
   remote: https://github.com/i2w/i2w-data_object.git
-  revision: f29ea47a82a36bde66355395214a3a3ad9a95a5c
+  revision: 01f9d7b819a04fb1957822258ca6b3424edb7981
   branch: main
   specs:
     i2w-data_object (0.1.0)
+
+GIT
+  remote: https://github.com/i2w/i2w-result.git
+  revision: 4f09b55c9659729da8623bbd239de9a320f5fe20
+  branch: main
+  specs:
+    i2w-result (0.1.0)
 
 PATH
   remote: .
@@ -47,6 +54,7 @@ DEPENDENCIES
   activerecord (>= 6)
   i2w-data_object!
   i2w-repo!
+  i2w-result!
   minitest-autotest
   rake (>= 13.0.3)
   sqlite3

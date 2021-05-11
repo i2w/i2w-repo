@@ -5,6 +5,8 @@ require 'active_record'
 module I2w
   # record base class
   class Record < ActiveRecord::Base
+    extend Repo.associated_class_extension model: -> { name.sub(/Record\z/, '').constantize }
+
     self.abstract_class = true
 
     def to_hash

@@ -2,10 +2,13 @@
 
 require 'active_model'
 require 'i2w/data_object'
+require_relative 'repo/associated_class'
 
 module I2w
   # Input base class.
   class Input < DataObject::Mutable
+    extend Repo.associated_class_extension model: -> { name.sub(/Input\z/, '').constantize }
+
     extend ActiveModel::Callbacks
     include ActiveModel::Conversion
     include ActiveModel::Validations
@@ -17,9 +20,11 @@ module I2w
 
     class ValidationContextUnsupportedError < Error; end
 
-    # we are more permissive with input than a standard DataObject
-    def self.new(object = {})
-      super(**to_attributes_hash(object))
+    class << self
+      # we are more permissive with input than a standard DataObject
+      def new(object = {})
+        super(**to_attributes_hash(object))
+      end
     end
 
     # sometimes we need to transfer errors from after validation, such as db contraint errors
@@ -40,6 +45,10 @@ module I2w
       super
     end
     alias attributes to_hash
+
+    def to_input
+      self
+    end
 
     def persisted?
       false

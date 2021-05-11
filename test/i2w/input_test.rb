@@ -4,6 +4,8 @@ require 'test_helper'
 
 module I2w
   class InputTest < ActiveSupport::TestCase
+    class Foo; end
+    
     class FooInput < Input
       attribute :foo
       attribute :faz
@@ -53,6 +55,10 @@ module I2w
 
       assert_equal({ foo: 'bar', faz: 'BAZ' }, patched_by_hash.attributes)
       assert_equal({ foo: 'bar', faz: 'BAZ' }, patched_by_kwargs.attributes)
-     end
+    end
+
+    test 'model_class' do
+      assert_equal Foo, FooInput.model_class
+    end
   end
 end
