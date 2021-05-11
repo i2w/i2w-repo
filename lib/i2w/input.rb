@@ -2,14 +2,14 @@
 
 require 'active_model'
 require 'i2w/data_object'
-require_relative 'repo/associated_class_accessor'
+require_relative 'repo/class_accessor'
 
 module I2w
   # Input base class.
   class Input < DataObject::Mutable
-    extend Repo::AssociatedClassAccessor
+    extend Repo::ClassAccessor
     
-    associated_class_accessor model: -> { name.sub(/Input\z/, '').constantize }
+    repo_class_accessor model: -> { name.sub(/Input\z/, '').constantize }
 
     extend ActiveModel::Callbacks
     include ActiveModel::Conversion
