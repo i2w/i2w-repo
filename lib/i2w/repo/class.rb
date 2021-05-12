@@ -11,22 +11,27 @@ module I2w
         base.define_singleton_method(:repo_class_type) { repo_class_type }
       end
 
-      def repo_class_accessor(*types, **readers)
-        readers[:model] ||= proc { LookupClass.default_model_class_for(self) } if types.include?(:model)
-        (types | readers.keys).each do |type|
-          define_repo_class_accessor(type, readers[type])
-        end
+      def repo_class_accessor(*types, **defaults)
+        defaults[:model] ||= proc { LookupClass.default_model_class_for(self) } if types.include?(:model)
+
+        (types | defaults.keys).each { |type| define_repo_class_accessor(type, defaults[type]) }
       end
 
       private
 
-      def define_repo_class_accessor(type, reader = nil)
+      def define_repo_class_accessor(type, default = nil)
         attr = "#{type}_class"
-        reader ||= proc { Repo.lookup(self, type) }
-        define_singleton_method attr do
-          instance_variable_get("@#{attr}") || instance_variable_set("@#{attr}", instance_exec(&reader))
+        default ||= proc { Repo.lookup(self, type) }
+
+        define_singleton_method("#{attr}=") do |klass|
+          define_singleton_method(attr) { klass }
         end
-        singleton_class.module_eval { private attr_writer attr }
+
+        singleton_class.module_eval { private "#{attr}=" }
+
+        define_singleton_method(attr) do
+          instance_exec(&default).tap { |klass| define_singleton_method(attr) { klass } }
+        end
       end
 
       def model_class=(model_class)
