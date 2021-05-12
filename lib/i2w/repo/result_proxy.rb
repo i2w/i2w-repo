@@ -16,9 +16,9 @@ module I2w
     #   # => Result::Failure(user_input with errors)
     #   # => Result::Success(User(...))
     class ResultProxy
-      def initialize(repository_class, input_class = nil)
+      def initialize(repository_class, input_class)
         @repository = repository_class.new
-        @input_class = input_class || AssociatedClass.call(repository_class, :input)
+        @input_class = input_class
       end
 
       def method_missing(method, ...)
@@ -29,7 +29,7 @@ module I2w
       end
 
       def respond_to_missing?(...)
-        @repository.respond_to_missing?(...)
+        @repository.respond_to?(...)
       end
 
       def convert_failure_to_input_failure(result, *_args, **kwargs)

@@ -18,7 +18,7 @@ module I2w
 
     class BazRecord < Record
       self.table_name = 'bazzes'
-      self.model_class = Foo
+      def self.model_class = Foo
     end
 
     test 'table_name defaults to standard active record table name, but can be overridden' do
@@ -28,8 +28,8 @@ module I2w
     end
 
     test 'associated classes' do
-      assert_equal Foo, FooRecord.model_class
-      assert_equal Foo, BazRecord.model_class
+      assert_equal Foo, Repo.lookup(FooRecord, :model)
+      assert_equal Foo, Repo.lookup(BazRecord, :model)
     end
   end
 end

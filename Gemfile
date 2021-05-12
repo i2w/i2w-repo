@@ -14,4 +14,4 @@ group :development do
 end
 
 # To use a debugger
-# gem 'byebug', group: [:development, :test]
+gem 'ruby_jard', groups: ['development', 'test']

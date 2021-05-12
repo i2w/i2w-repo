@@ -20,7 +20,7 @@ module I2w
     extend ActiveModel::Naming
     include ActiveModel::Conversion
 
-    def self.model_class = self
+    def self.repo_class_type = :model
 
     def persisted?
       false

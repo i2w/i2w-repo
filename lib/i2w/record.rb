@@ -1,14 +1,12 @@
 # frozen_string_literal: true
 
 require 'active_record'
-require_relative 'repo/class_accessor'
+require_relative 'repo/class'
 
 module I2w
   # record base class
   class Record < ActiveRecord::Base
-    extend Repo::ClassAccessor
-    
-    repo_class_accessor model: -> { name.sub(/Record\z/, '').constantize }
+    extend Repo::Class
 
     self.abstract_class = true
 

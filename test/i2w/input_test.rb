@@ -58,7 +58,7 @@ module I2w
     end
 
     test 'model_class' do
-      assert_equal Foo, FooInput.model_class
+      assert_equal Foo, Repo.lookup(FooInput, :model)
     end
   end
 end
