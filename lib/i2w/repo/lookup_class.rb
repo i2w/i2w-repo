@@ -10,11 +10,6 @@ module I2w
     module LookupClass
       class << self
         def call(klass, type = :model)
-          @associated_classes ||= Hash.new { |m, args| m[args] = associated_class_for(*args) }
-          @associated_classes[[klass, type]]
-        end
-
-        def associated_class_for(klass, type)
           return klass if klass.repo_class_type == type
 
           model_class = model_class_for(klass)
