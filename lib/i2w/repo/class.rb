@@ -22,6 +22,7 @@ module I2w
       def define_repo_class_accessor(type, default = nil)
         attr = "#{type}_class"
         default ||= proc { Repo.lookup(self, type) }
+        default = proc { default } unless default.respond_to?(:call)
 
         define_singleton_method("#{attr}=") do |klass|
           define_singleton_method(attr) { klass }
