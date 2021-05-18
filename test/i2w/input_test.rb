@@ -4,8 +4,10 @@ require 'test_helper'
 
 module I2w
   class InputTest < ActiveSupport::TestCase
-    class Foo; end
-    
+    class Foo < DataObject::Immutable
+      attribute :foo
+    end
+
     class FooInput < Input
       attribute :foo
       attribute :faz
@@ -59,6 +61,14 @@ module I2w
 
     test 'model_class' do
       assert_equal Foo, Repo.lookup(FooInput, :model)
+    end
+
+    test '.from_model(model)' do
+      model = Foo.new(foo: 'bar')
+      input = FooInput.from_model(model)
+
+      assert_equal model, input.model
+      assert_equal 'bar', input.foo
     end
   end
 end
