@@ -3,6 +3,7 @@
 require 'active_model'
 require 'i2w/data_object'
 require_relative 'repo/class'
+require_relative 'input/with_model'
 
 module I2w
   # Input base class.
@@ -25,11 +26,9 @@ module I2w
         super(**to_attributes_hash(object))
       end
 
-      # to keep a reference to the underlying model, use this method
-      # this undelying model reference can be used to check if an input corresponds to a persisted object,
-      # and the generate routing paths
+      # return an input initialized from a model, and with the model in a tuple object
       def from_model(model)
-        new(**model).tap { |input| input.send(:set_model, model) }
+        WithModel.new(new(**model), model)
       end
     end
 
@@ -58,16 +57,6 @@ module I2w
 
     def persisted?
       false
-    end
-
-    def model
-      @_model
-    end
-
-    private
-
-    def set_model(model)
-      @_model = model
     end
   end
 end

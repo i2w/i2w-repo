@@ -7,7 +7,7 @@ module I2w
     # Proxy that wraps repo calls in a result_wrapper
     #
     # standard use
-    #   UserRepo.create user_input
+    #   UserRepo.new.create user_input
     #   # => ActiveRecord::NullViolation
     #   # => User(....)
     #
@@ -36,8 +36,17 @@ module I2w
         input = kwargs[:input] || {}
         input = input.respond_to?(:to_input) ? input.to_input : @input_class.new(input)
         input.errors = result.errors
+        model = attempt_load_model(kwargs[:id]) if kwargs[:id] && result.failure != :not_found
+        input = Input::WithModel.new(input, model) if model
         Result.failure(input)
       end
+
+      # rubocop:disable Lint/SuppressedException
+      def attempt_load_model(id)
+        @repository.find(id: id)
+      rescue ActiveRecord::ActiveRecordError
+      end
+      # rubocop:enable Lint/SuppressedException
     end
   end
 end
