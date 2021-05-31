@@ -26,6 +26,9 @@ module I2w
       false
     end
 
+    alias to_hash attributes
+    alias to_h attributes
+
     # a standard rails persisted model with :id pkey and timestamps
     class Persisted < Model
       attribute :id

@@ -1,13 +1,13 @@
 GIT
   remote: https://github.com/i2w/i2w-data_object.git
-  revision: 01f9d7b819a04fb1957822258ca6b3424edb7981
+  revision: 8e6a48cfe44d2117c8beec5ac2de8874168cf6f2
   branch: main
   specs:
     i2w-data_object (0.1.0)
 
 GIT
   remote: https://github.com/i2w/i2w-result.git
-  revision: 4f09b55c9659729da8623bbd239de9a320f5fe20
+  revision: a91c895aafc68eb4f79bbcf906d1d0a2a5517370
   branch: main
   specs:
     i2w-result (0.1.0)
@@ -20,12 +20,12 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activemodel (6.1.3.1)
-      activesupport (= 6.1.3.1)
-    activerecord (6.1.3.1)
-      activemodel (= 6.1.3.1)
-      activesupport (= 6.1.3.1)
-    activesupport (6.1.3.1)
+    activemodel (6.1.3.2)
+      activesupport (= 6.1.3.2)
+    activerecord (6.1.3.2)
+      activemodel (= 6.1.3.2)
+      activesupport (= 6.1.3.2)
+    activesupport (6.1.3.2)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)

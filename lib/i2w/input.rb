@@ -27,7 +27,7 @@ module I2w
       end
 
       # return an input initialized from a model, and with the model in a tuple object
-      def from_model(model)
+      def with_model(model)
         WithModel.new(new(**model), model)
       end
     end
@@ -43,13 +43,15 @@ module I2w
       super
     end
 
-    # we raise an error if we attempt to access attributes on an invalid object
-    def to_hash
+    # we raise an error if we attempt to access attributes on an invalid input
+    def attributes
       raise InvalidAttributesError unless valid?
 
       super
     end
-    alias attributes to_hash
+
+    alias to_hash attributes
+    alias to_h attributes
 
     def to_input
       self
