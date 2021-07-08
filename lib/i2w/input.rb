@@ -20,16 +20,12 @@ module I2w
 
     class ValidationContextUnsupportedError < Error; end
 
-    class << self
-      # we are more permissive with input than a standard DataObject
-      def new(object = {})
-        super(**to_attributes_hash(object))
-      end
+    # return an input initialized from a model, and with the model in a tuple object
+    def self.with_model(model) = WithModel.new(new(**model), model)
 
-      # return an input initialized from a model, and with the model in a tuple object
-      def with_model(model)
-        WithModel.new(new(**model), model)
-      end
+    # we are more permissive with input than a standard DataObject
+    def initialize(object = {})
+      super(**self.class.to_attributes_hash(object))
     end
 
     # sometimes we need to transfer errors from after validation, such as db contraint errors
@@ -53,12 +49,8 @@ module I2w
     alias to_hash attributes
     alias to_h attributes
 
-    def to_input
-      self
-    end
+    def to_input = self
 
-    def persisted?
-      false
-    end
+    def persisted? = false
   end
 end

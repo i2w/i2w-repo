@@ -13,6 +13,8 @@ module I2w
   class Repository
     extend Repo::Class
 
+    # TODO: make this a singleton by default.
+
     repo_class_accessor :model, :record
 
     # TODO: Query objects, which are instances of a query monad (all read only)
