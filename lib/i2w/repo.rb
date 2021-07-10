@@ -15,7 +15,7 @@ module I2w
     class << self
       def result_proxy(klass, input_class = nil)
         repository_class = lookup(klass, :repository)
-        input_class ||= lookup(repository_class, :input)
+        input_class ||= Result.wrap { lookup(repository_class, :input) }.value_or(nil)
 
         @result_proxies ||= Hash.new { |m, args| m[args] = ResultProxy.new(*args) }
         @result_proxies[[repository_class, input_class]]
