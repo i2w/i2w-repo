@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'i2w/memoize'
+
 require_relative 'repo/version'
 require_relative 'input'
 require_relative 'model'
@@ -13,19 +15,21 @@ module I2w
   # monadic results, on top of active record.
   module Repo
     class << self
-      def result_proxy(klass, input_class = nil)
+      extend Memoize
+
+      def for(klass, input_class = nil)
         repository_class = lookup(klass, :repository)
-        input_class ||= Result.wrap { lookup(repository_class, :input) }.value_or(nil)
+        input_class ||= lookup(repository_class, :input)
+        input_class = Input if input_class.is_a?(MissingClass)
 
-        @result_proxies ||= Hash.new { |m, args| m[args] = ResultProxy.new(*args) }
-        @result_proxies[[repository_class, input_class]]
+        result_proxy(repository_class, input_class)
       end
-      alias [] result_proxy
 
-      def lookup(klass, type)
-        @lookups ||= Hash.new { |m, args| m[args] = LookupClass.call(*args) }
-        @lookups[[klass, type]]
-      end
+      alias [] for
+
+      memoize def result_proxy(...) = ResultProxy.new(...)
+
+      memoize def lookup(klass, type) = LookupClass.call(klass, type)
     end
   end
 end

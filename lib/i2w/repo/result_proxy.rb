@@ -18,7 +18,7 @@ module I2w
     class ResultProxy
       def initialize(repository_class, input_class)
         @repository = repository_class.new
-        @input_class = input_class || Input
+        @input_class = input_class
       end
 
       def method_missing(method, ...)
