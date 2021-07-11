@@ -8,11 +8,11 @@ module I2w
     class MissingClass
       attr_reader :name, :type, :message, :exception
       
-      def initialize(exception, type: nil, name: nil, message: nil)
+      def initialize(exception = nil, type: nil, name: nil, message: nil)
         @type = type
         @exception = exception
-        @name = name || exception.missing_name
-        @message = message || exception.message
+        @name = name || exception&.missing_name
+        @message = message || exception&.message
       end
     end
   end
