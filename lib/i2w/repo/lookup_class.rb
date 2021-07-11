@@ -24,16 +24,16 @@ module I2w
         end
 
         def model_class_for(klass)
-          raise NotRepoClassError unless klass.respond_to?(:repo_class_type) || klass.respond_to?(:model_class)
-
           return klass.model_class if klass.respond_to?(:model_class)
+          raise NotRepoClassError unless klass.respond_to?(:repo_class_type)
+
           return klass if klass.repo_class_type == :model
 
           default_model_class_for(klass)
         end
 
         def default_model_class_for(klass)
-          raise NotRepoClassError unless klass.respond_to?(:repo_class_type) || klass.respond_to?(:model_class)
+          raise NotRepoClassError unless klass.respond_to?(:repo_class_type)
 
           class_name = klass.name.sub(/#{klass.repo_class_type.to_s.camelize}\z/, '')
           class_name.constantize
