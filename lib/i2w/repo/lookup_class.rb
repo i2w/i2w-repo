@@ -24,7 +24,7 @@ module I2w
           class_name = "#{model_class}#{type.to_s.camelize}"
           class_name.constantize
         rescue NameError => e
-          MissingClass.new(class_name, type: type, error: e)
+          MissingClass.new(e, type: type)
         end
 
         def model_class_for(klass)
@@ -38,7 +38,7 @@ module I2w
           class_name = klass.name.sub(/#{klass.repo_class_type.to_s.camelize}\z/, '')
           class_name.constantize
         rescue NameError => e
-          MissingClass.new(class_name, type: :model, error: e)
+          MissingClass.new(e, type: :model)
         end
       end
     end

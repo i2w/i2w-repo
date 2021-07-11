@@ -6,11 +6,13 @@ module I2w
   module Repo
     # represents a repo class that couldn't be found.
     class MissingClass
-      def initialize(name, type: nil, error: nil, message: nil)
-        @name = name
+      attr_reader :name, :type, :message, :exception
+      
+      def initialize(exception, type: nil, name: nil, message: nil)
         @type = type
-        @error = error
-        @message = message
+        @exception = exception
+        @name = name || exception.missing_name
+        @message = message || exception.message
       end
     end
   end
