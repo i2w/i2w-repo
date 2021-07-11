@@ -12,10 +12,6 @@ module I2w
     module LookupClass
       class << self
         def call(klass, type = :model)
-          unless klass.respond_to?(:repo_class_type) || klass.respond_to?(:model_class)
-            raise ArgumentError, 'klass must respond to #repo_class_type or #model_class'
-          end
-
           return klass if klass.respond_to?(:repo_class_type) && klass.repo_class_type == type
 
           model_class = model_class_for(klass)
@@ -28,6 +24,8 @@ module I2w
         end
 
         def model_class_for(klass)
+          raise NotRepoClassError unless klass.respond_to?(:repo_class_type) || klass.respond_to?(:model_class)
+
           return klass.model_class if klass.respond_to?(:model_class)
           return klass if klass.repo_class_type == :model
 
@@ -35,6 +33,8 @@ module I2w
         end
 
         def default_model_class_for(klass)
+          raise NotRepoClassError unless klass.respond_to?(:repo_class_type) || klass.respond_to?(:model_class)
+
           class_name = klass.name.sub(/#{klass.repo_class_type.to_s.camelize}\z/, '')
           class_name.constantize
         rescue NameError => e

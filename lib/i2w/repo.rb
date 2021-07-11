@@ -17,7 +17,7 @@ module I2w
     class << self
       extend Memoize
 
-      def for(klass, input_class = nil)
+      memoize def for(klass, input_class = nil)
         repository_class = lookup(klass, :repository)
         input_class ||= lookup(repository_class, :input)
         input_class = Input if input_class.is_a?(MissingClass)
@@ -30,6 +30,14 @@ module I2w
       memoize def result_proxy(...) = ResultProxy.new(...)
 
       memoize def lookup(klass, type) = LookupClass.call(klass, type)
+    end
+
+    class Error < RuntimeError; end
+
+    class NotRepoClassError < Error
+      def initialize(message = 'class must respond to #repo_class_type or #model_class', *args, **opts)
+        super(message, *args, **opts)
+      end
     end
   end
 end
