@@ -23,8 +23,6 @@ module I2w
 
       def repo_class_base_name = name.sub(/#{repo_class_type.to_s.camelize}\z/, '')
 
-      def repo_base(class_name) = define_singleton_method(:repo_class_base_name) { class_name.to_s }
-
       def repo_class_accessor(*types, **defaults)
         (types | defaults.keys).each { |type| define_repo_class_accessor(type, defaults[type]) }
       end
@@ -36,14 +34,20 @@ module I2w
         default ||= proc { repo_class_ref(type).lookup }
         default = proc { default } unless default.respond_to?(:call)
 
-        define_singleton_method("#{attr}=") do |klass|
-          define_singleton_method(attr) { klass }
-        end
+        define_singleton_method("#{attr}=") { instance_variable_set(:"@#{attr}", _1) }
 
         singleton_class.module_eval { private "#{attr}=" }
 
         define_singleton_method(attr) do
-          instance_exec(&default).tap { |klass| define_singleton_method(attr) { klass } }
+          instance_variable_get(:"@#{attr}") || instance_variable_set(:"@#{attr}", instance_exec(&default))
+        end
+      end
+
+      def repo_base(class_name = nil, &lazy)
+        lazy ||= proc { class_name }
+        meth = :repo_class_base_name
+        define_singleton_method(meth) do
+          instance_variable_get(:"@#{meth}") || instance_variable_set(:"@#{meth}", lazy.call.to_s)
         end
       end
 
