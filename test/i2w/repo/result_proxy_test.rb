@@ -13,16 +13,14 @@ module I2w
 
       class FooRepository < Repository; end
 
-      class StrangeFooInput < Input
-        self.model_class = Foo
-      end
+      class StrangeFooInput < Input; end
 
       class StrangeFooRecord < Record
-        self.model_class = Foo
+        repo_base Foo
       end
 
       test 'Repo[...] returns a result proxy for the repository of the class' do
-        [Foo, FooRepository, StrangeFooInput, StrangeFooRecord].each do |klass|
+        [Foo, FooRepository, StrangeFooRecord].each do |klass|
           actual = Repo[klass]
           assert_equal ResultProxy, actual.class
           assert actual.respond_to?(:destroy)

@@ -8,7 +8,7 @@ require_relative 'model'
 require_relative 'record'
 require_relative 'repository'
 require_relative 'repo/result_proxy'
-require_relative 'repo/lookup_class'
+require_relative 'repo/class'
 
 module I2w
   # Repo contains a bunch of loosely coupled classes for implementing a repository pattern, with optional
@@ -18,9 +18,11 @@ module I2w
       extend Memoize
 
       memoize def for(klass, input_class = nil)
-        repository_class = lookup(klass, :repository)
-        input_class ||= lookup(repository_class, :input)
-        input_class = Input if input_class.is_a?(MissingClass)
+        repository_class = Repo::Class.lookup(klass, :repository)
+        input_class ||= Repo::Class.lookup(repository_class, :input)
+
+        # TODO: make a special class for ResultInput or something
+        input_class = Input if input_class.is_a?(Repo::Class::Ref)
 
         result_proxy(repository_class, input_class)
       end
@@ -29,15 +31,7 @@ module I2w
 
       memoize def result_proxy(...) = ResultProxy.new(...)
 
-      memoize def lookup(klass, type) = LookupClass.call(klass, type)
-    end
-
-    class Error < RuntimeError; end
-
-    class NotRepoClassError < Error
-      def initialize(message = 'class must respond to #repo_class_type or #model_class', *args, **opts)
-        super(message, *args, **opts)
-      end
+      memoize def lookup(...) = Repo::Class.lookup(...)
     end
   end
 end

@@ -14,11 +14,11 @@ module I2w
       class FooRepository < Repository; end
 
       class StrangeFooInput < Input
-        self.model_class = Foo
+        repo_base Foo
       end
 
-      class StrangeFooRecord < Record
-        self.model_class = Foo
+      class StrangeFooRepository < Repository
+        def self.repo_class_base_name = 'I2w::Repo::AssociatedClassTest::Foo'
       end
 
       test 'default associated classes' do
@@ -32,7 +32,7 @@ module I2w
 
       test 'lookup associated classes' do
         assert_equal FooRepository, Repo.lookup(StrangeFooInput, :repository)
-        assert_equal FooInput, Repo.lookup(StrangeFooRecord, :input)
+        assert_equal FooInput, Repo.lookup(StrangeFooRepository, :input)
         assert_equal FooRecord, Repo.lookup(FooRepository, :record)
         assert_equal Foo, Repo.lookup(FooRepository, :model)
       end

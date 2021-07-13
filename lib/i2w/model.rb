@@ -22,6 +22,8 @@ module I2w
 
     def self.repo_class_type = :model
 
+    def self.repo_class_base_name = name
+
     def persisted?
       false
     end
