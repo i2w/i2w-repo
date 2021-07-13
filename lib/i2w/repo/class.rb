@@ -33,7 +33,7 @@ module I2w
 
       def define_repo_class_accessor(type, default = nil)
         attr = "#{type}_class"
-        default ||= proc { Ref.new(repo_class_base_name, type).lookup }
+        default ||= proc { repo_class_ref(type).lookup }
         default = proc { default } unless default.respond_to?(:call)
 
         define_singleton_method("#{attr}=") do |klass|
@@ -46,6 +46,8 @@ module I2w
           instance_exec(&default).tap { |klass| define_singleton_method(attr) { klass } }
         end
       end
+
+      def repo_class_ref(type) = Ref.new(repo_class_base_name, type)
 
       # used in place of a conventional class which can't be found, be other classes can still be derived from it
       class Ref
