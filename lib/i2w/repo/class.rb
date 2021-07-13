@@ -9,7 +9,7 @@ module I2w
       class << self
         def lookup(ref, type)
           return ref if ref.respond_to?(:repo_class_type) && ref.repo_class_type == type
-          return ref.lookup(type) if ref.instance_of?(Ref)
+          return ref.lookup(type) if ref.respond_to?(:lookup)
 
           class_reader = :"#{type}_class"
           return ref.send(class_reader) if ref.respond_to?(class_reader)
@@ -66,9 +66,13 @@ module I2w
 
         def lookup(type = self.type)
           class_name = type == :model ? base_name : "#{base_name}#{type.to_s.camelize}"
+          try_constantize(class_name) || self.class.new(base_name, type)
+        end
+
+        def try_constantize(class_name)
           class_name.constantize
         rescue NameError
-          Ref.new(base_name, type)
+          nil
         end
 
         def respond_to_missing?(...) = true
