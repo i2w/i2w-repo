@@ -47,7 +47,7 @@ module I2w
         lazy ||= proc { class_name }
         meth = :repo_class_base_name
         define_singleton_method(meth) do
-          instance_variable_get(:"@#{meth}") || instance_variable_set(:"@#{meth}", lazy.call.to_s)
+          instance_variable_get(:"@#{meth}") || instance_variable_set(:"@#{meth}", instance_exec(&lazy).to_s)
         end
       end
 
