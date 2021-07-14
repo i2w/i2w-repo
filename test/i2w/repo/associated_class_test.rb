@@ -18,7 +18,7 @@ module I2w
       end
 
       class StrangeFooRepository < Repository
-        def self.repo_class_base_name = 'I2w::Repo::AssociatedClassTest::Foo'
+        repo_base 'I2w::Repo::AssociatedClassTest::Foo'
       end
 
       test 'default associated classes' do

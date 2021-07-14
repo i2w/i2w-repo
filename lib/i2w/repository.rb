@@ -2,7 +2,6 @@
 
 require 'active_record'
 
-require_relative 'repo/class'
 require_relative 'model'
 require_relative 'record'
 
@@ -11,11 +10,7 @@ module I2w
   # Repository methods return models, raise ActiveRecord errors, and are quite simple to write.
   # By convention they use named arguments id:, and input: for CRUD methods
   class Repository
-    extend Repo::Class
-
-    # TODO: make this a singleton by default.
-
-    repo_class_accessor :model, :record
+    extend Repo::Base.extension :repository, accessors: %i[model record]
 
     # TODO: Query objects, which are instances of a query monad (all read only)
     def all

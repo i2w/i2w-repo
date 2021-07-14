@@ -16,7 +16,7 @@ module I2w
       class StrangeFooInput < Input; end
 
       class StrangeFooRecord < Record
-        repo_base { Foo }
+        repo_base Foo
       end
 
       test 'Repo[...] returns a result proxy for the repository of the class' do

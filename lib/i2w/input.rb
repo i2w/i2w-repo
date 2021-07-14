@@ -2,23 +2,17 @@
 
 require 'active_model'
 require 'i2w/data_object'
-require_relative 'repo/class'
 require_relative 'input/with_model'
 
 module I2w
   # Input base class.
   class Input < DataObject::Mutable
-    extend Repo::Class
+    extend Repo::Base.extension :input
+
     extend ActiveModel::Callbacks
     include ActiveModel::Conversion
     include ActiveModel::Validations
     include ActiveModel::Validations::Callbacks
-
-    class Error < RuntimeError; end
-
-    class InvalidAttributesError < Error; end
-
-    class ValidationContextUnsupportedError < Error; end
 
     # return an input initialized from a model, and with the model in a tuple object
     def self.with_model(model) = WithModel.new(new(**model), model)
@@ -52,5 +46,11 @@ module I2w
     def to_input = self
 
     def persisted? = false
+
+    class Error < RuntimeError; end
+
+    class InvalidAttributesError < Error; end
+
+    class ValidationContextUnsupportedError < Error; end
   end
 end
