@@ -17,7 +17,7 @@ module I2w
   #
   # You may create aggregate, or non persisted models by inheriting from I2w::Model, or adding another base class
   class Model < DataObject::Immutable
-    extend Repo::Base.extension :model, to_base: -> { _1 }, from_base: -> { _1 }
+    extend Repo::Base.extension :model, to_base: proc { _1 }, from_base: proc { _1 }
 
     extend ActiveModel::Naming
     include ActiveModel::Conversion
