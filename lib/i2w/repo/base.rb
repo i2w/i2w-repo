@@ -7,7 +7,7 @@ module I2w
     # provides lookup and configuration of repo base classes
     module Base
       class << self
-        def conventions = @conventions ||= {}
+        def converters = @converters ||= {}
 
         def lookup(ref, type, *args)
           return ref.send("#{type}_class", *args) if ref.respond_to?("#{type}_class")
@@ -20,25 +20,25 @@ module I2w
           return ref.lookup(type, *args) if ref.respond_to?(:lookup)
 
           base = ref.respond_to?(:repo_base) ? ref.repo_base : ref.to_s
-          Ref.new(base, type).lookup(type, *args)
+          Ref.new(base).lookup(type, *args)
         end
 
-        def extension(type, from_base:, to_base:, accessors: [], search_namespaces: false)
-          conventions[type] = { from_base: from_base, search_namespaces: search_namespaces }
+        def extension(type, from_base:, to_base:, accessors: [])
+          converters[type] = { from_base: from_base, to_base: to_base }
 
           Module.new.tap do
-            define_repo_methods(_1, type, to_base)
+            define_repo_methods(_1, type)
             define_accessors(_1, accessors)
           end
         end
 
         private
 
-        def define_repo_methods(extension, type, to_base)
+        def define_repo_methods(extension, type)
           extension.define_method(:repo_type) { type }
-          extension.define_method(:repo_base) do |class_name = nil|
-            @repo_base = class_name.to_s if class_name
-            @repo_base ||= to_base.call(name)
+          extension.define_method(:repo_base) do |base = nil|
+            @repo_base = base.to_s if base
+            @repo_base ||= Base.converters.fetch(type)[:to_base].call(name)
           end
         end
 
@@ -66,34 +66,23 @@ module I2w
 
       # a reference to a repo class, other classes can still be derived from it if it isn't defined
       class Ref
-        attr_reader :base, :type
+        attr_reader :base
 
-        def initialize(base, type)
-          raise ArgumentError, 'pass string [, symbol]' unless base.is_a?(String) && type.is_a?(Symbol)
+        def initialize(base)
+          raise ArgumentError, 'pass string' unless base.is_a?(String)
 
           @base = base
-          @type = type
         end
 
-        def to_s = "#{self.class.name}[#{base} :#{type}]"
+        def to_s = "#{self.class.name}[#{base}]"
 
         def lookup(type, *args)
-          class_name = base_to_class_name(type, *args)
-          klass = search_namespaces? ? try_namespaced_constantize(class_name) : try_constantize(class_name)
-          klass || self.class.new(base, type)
+          try_constantize(base_to_class_name(type, *args)) || self
         end
 
-        def base_to_class_name(type, *args) = Base.conventions.fetch(type).fetch(:from_base).call(base, *args)
-
-        def search_namespaces? = Base.conventions.fetch(type).fetch(:search_namespaces)
+        def base_to_class_name(type, *args) = Base.converters.fetch(type).fetch(:from_base).call(base, *args)
 
         def try_constantize(class_name)
-          class_name.constantize
-        rescue NameError
-          nil
-        end
-
-        def try_namespaced_constantize(class_name)
           parts = class_name.split('::')
           candidates = parts.length.times.map { parts[_1..].join('::').to_s }
           candidates.each do |candidate|
