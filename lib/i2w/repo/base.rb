@@ -9,23 +9,23 @@ module I2w
       class << self
         def conventions = @conventions ||= {}
 
-        def lookup(ref, type)
-          return ref.send("#{type}_class") if ref.respond_to?("#{type}_class")
+        def lookup(ref, type, *args)
+          return ref.send("#{type}_class", *args) if ref.respond_to?("#{type}_class")
 
-          base_lookup(ref, type)
+          base_lookup(ref, type, *args)
         end
 
-        def base_lookup(ref, type)
-          return ref if ref.respond_to?(:repo_type) && ref.repo_type == type
-          return ref.lookup(type) if ref.respond_to?(:lookup)
+        def base_lookup(ref, type, *args)
+          return ref if ref.respond_to?(:repo_type) && ref.repo_type == type && args.empty?
+          return ref.lookup(type, *args) if ref.respond_to?(:lookup)
 
           base = ref.respond_to?(:repo_base) ? ref.repo_base : ref.to_s
-          Ref.new(base, type).lookup
+          Ref.new(base, type).lookup(type, *args)
         end
 
         def extension(type, accessors: [], from_base: nil, to_base: nil, search_namespaces: false)
-          from_base ||= -> { "#{_1}#{type.to_s.camelize}" }
-          to_base   ||= -> { _1.sub(/#{type.to_s.camelize}\z/, '') }
+          from_base ||= proc { "#{_1}#{type.to_s.camelize}" }
+          to_base   ||= proc { _1.sub(/#{type.to_s.camelize}\z/, '') }
 
           conventions[type] = { from_base: from_base, search_namespaces: search_namespaces }
 
@@ -80,13 +80,13 @@ module I2w
 
         def to_s = "#{self.class.name}[#{base} :#{type}]"
 
-        def lookup(type = self.type)
-          class_name = base_to_class_name(type)
+        def lookup(type, *args)
+          class_name = base_to_class_name(type, *args)
           klass = search_namespaces? ? try_namespaced_constantize(class_name) : try_constantize(class_name)
           klass || self.class.new(base, type)
         end
 
-        def base_to_class_name(type) = Base.conventions.fetch(type).fetch(:from_base).call(base)
+        def base_to_class_name(type, *args) = Base.conventions.fetch(type).fetch(:from_base).call(base, *args)
 
         def search_namespaces? = Base.conventions.fetch(type).fetch(:search_namespaces)
 
