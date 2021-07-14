@@ -5,7 +5,9 @@ require 'active_record'
 module I2w
   # record base class
   class Record < ActiveRecord::Base
-    extend Repo::Base.extension :record
+    extend Repo::Base.extension :record,
+                                to_base: proc { _1.sub(/Record\z/, '') },
+                                from_base: proc { "#{_1}Record" }
 
     self.abstract_class = true
 

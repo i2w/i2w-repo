@@ -23,10 +23,7 @@ module I2w
           Ref.new(base, type).lookup(type, *args)
         end
 
-        def extension(type, accessors: [], from_base: nil, to_base: nil, search_namespaces: false)
-          from_base ||= proc { "#{_1}#{type.to_s.camelize}" }
-          to_base   ||= proc { _1.sub(/#{type.to_s.camelize}\z/, '') }
-
+        def extension(type, from_base:, to_base:, accessors: [], search_namespaces: false)
           conventions[type] = { from_base: from_base, search_namespaces: search_namespaces }
 
           Module.new.tap do
@@ -56,13 +53,13 @@ module I2w
 
         def define_accessor(extension, type, value = nil)
           attr = "#{type}_class"
-          value ||= -> { Base.base_lookup(self, type) }
+          value ||= ->(*args) { Base.base_lookup(self, type, *args) }
           value = -> { value } unless value.respond_to?(:call)
 
           extension.define_method("#{attr}=") { instance_variable_set :"@#{attr}", _1 }
           extension.module_eval { private "#{attr}=" }
-          extension.define_method(attr) do
-            instance_variable_get(:"@#{attr}") || instance_variable_set(:"@#{attr}", instance_exec(&value))
+          extension.define_method(attr) do |*args|
+            instance_variable_get(:"@#{attr}") || instance_exec(*args, &value)
           end
         end
       end
