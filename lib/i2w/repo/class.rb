@@ -58,7 +58,7 @@ module I2w
         attr_reader :base_name, :type
 
         def initialize(base_name, type)
-          raise ArgumentError, 'pass string, and symbol' unless base_name.is_a?(String) && type.is_a?(Symbol)
+          raise ArgumentError, 'pass string [, symbol]' unless base_name.is_a?(String) && (!type || type.is_a?(Symbol))
 
           @base_name = base_name
           @type = type
