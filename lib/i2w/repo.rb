@@ -3,11 +3,7 @@
 require 'i2w/memoize'
 
 require_relative 'repo/version'
-require_relative 'repo/base'
-require_relative 'input'
-require_relative 'model'
-require_relative 'record'
-require_relative 'repository'
+require_relative 'group'
 require_relative 'repo/result_proxy'
 
 module I2w
@@ -17,21 +13,32 @@ module I2w
     class << self
       extend Memoize
 
-      memoize def for(klass, input_class = nil)
-        repository_class = Base.lookup(klass, :repository)
-        input_class ||= Base.lookup(repository_class, :input)
+      memoize def result_proxy(klass, input_class = nil)
+        repository_class = group.lookup(klass, :repository)
+        input_class ||= group.lookup(repository_class, :input)
 
         # TODO: make a special class for ResultInput or something
-        input_class = Input if input_class.is_a?(Base::Ref)
+        input_class = Input if input_class.is_a?(Group::MissingClass)
 
-        result_proxy(repository_class, input_class)
+        new_result_proxy(repository_class, input_class)
       end
 
-      alias [] for
+      alias [] result_proxy
 
-      memoize def result_proxy(...) = ResultProxy.new(...)
+      attr_reader :group
 
-      memoize def lookup(...) = Base.lookup(...)
+      memoize def lookup(...) = group.lookup(...)
+
+      memoize def new_result_proxy(...) = ResultProxy.new(...)
+
+      def register_class(...) = group.register(...)
     end
+
+    @group = Group.new
   end
 end
+
+require_relative 'input'
+require_relative 'model'
+require_relative 'record'
+require_relative 'repository'

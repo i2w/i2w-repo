@@ -14,11 +14,11 @@ module I2w
       class FooRepository < Repository; end
 
       class StrangeFooInput < Input
-        repo_base Foo
+        self.group_name = Foo
       end
 
       class StrangeFooRepository < Repository
-        repo_base 'I2w::Repo::AssociatedClassTest::Foo'
+        self.group_name = 'I2w::Repo::AssociatedClassTest::Foo'
       end
 
       test 'default associated classes' do
@@ -35,6 +35,76 @@ module I2w
         assert_equal FooInput, Repo.lookup(StrangeFooRepository, :input)
         assert_equal FooRecord, Repo.lookup(FooRepository, :record)
         assert_equal Foo, Repo.lookup(FooRepository, :model)
+      end
+
+      class Action
+        Repo.register_class self, :action do
+          def group_name = name.deconstantize.singularize
+
+          def from_group_name(group_name, action_name)
+            action_class_candidates(group_name, action_name).each do |class_name|
+              return class_name.constantize
+            rescue NameError
+              nil
+            end
+            raise NameError, "can't find action, searched: #{action_class_candidates(group_name, action_name)}"
+          end
+
+          private
+
+          def action_class_candidates(group_name, action_name)
+            parts = group_name.pluralize.split('::')
+            parts.length.times.map { [*parts[0..-_1], "#{action_name.to_s.camelize}Action"].join('::') }
+          end
+        end
+      end
+
+      class ShowAction < Action; end
+
+      module Foos
+        class EditAction < Action; end
+      end
+
+      module Backend
+        class NewAction < Action; end
+
+        class EditAction < Action; end
+
+        module Foos
+          class NewAction < Action; end
+        end
+
+        class FooRecord < Record; end
+
+        class Controller
+          Repo.register_class self, :controller do
+            def group_name = name.sub(/Controller\z/, '').singularize
+
+            def group_lookup(type, *args)
+              result = Repo.lookup group_name, type, *args
+              return result if result.is_a?(Class)
+
+              Repo.lookup(group_name.sub('::Backend::', '::'), type, *args)
+            end
+          end
+        end
+
+        class FoosController < Controller; end
+      end
+
+      test 'lookup classes based on action lookup scheme' do
+        assert_equal Foo,              Repo.lookup(Foos::EditAction, :model)
+        assert_equal Foos::EditAction, Repo.lookup(Foo, :action, :edit)
+        assert_equal ShowAction,       Repo.lookup(Foo, :action, :show)
+      end
+
+      test 'lookup in namespaces based on action lookup scheme' do
+        assert_equal Foo,                       Repo.lookup(Backend::FoosController, :model)
+        assert_equal Backend::FooRecord,        Repo.lookup(Backend::FoosController, :record)
+        assert_equal FooRepository,             Repo.lookup(Backend::FoosController, :repository)
+        assert_equal Backend::Foos::NewAction,  Repo.lookup(Backend::FoosController, :action, :new)
+        assert_equal Backend::EditAction,       Repo.lookup(Backend::FoosController, :action, :edit)
+        assert_equal ShowAction,                Repo.lookup(Backend::FoosController, :action, :show)
       end
     end
   end

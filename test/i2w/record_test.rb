@@ -19,7 +19,7 @@ module I2w
     class BazRecord < Record
       self.table_name = 'bazzes'
 
-      repo_base Foo
+      self.group_name = Foo
     end
 
     test 'table_name defaults to standard active record table name, but can be overridden' do

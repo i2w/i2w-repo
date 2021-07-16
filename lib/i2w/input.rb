@@ -7,9 +7,7 @@ require_relative 'input/with_model'
 module I2w
   # Input base class.
   class Input < DataObject::Mutable
-    extend Repo::Base.extension :input,
-                                to_base: proc { _1.sub(/Input\z/, '') },
-                                from_base: proc { "#{_1}Input" }
+    I2w::Repo.register_class self, :input
 
     extend ActiveModel::Callbacks
     include ActiveModel::Conversion

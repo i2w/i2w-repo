@@ -10,11 +10,7 @@ module I2w
   # Repository methods return models, raise ActiveRecord errors, and are quite simple to write.
   # By convention they use named arguments id:, and input: for CRUD methods
   class Repository
-    extend Repo::Base.extension :repository,
-                                accessors: %i[model record],
-                                to_base: proc { _1.sub(/Repository\z/, '') },
-                                from_base: proc { "#{_1}Repository" }
-
+    Repo.register_class self, :repository, accessors: %i[model record]
 
     # TODO: Query objects, which are instances of a query monad (all read only)
     def all
