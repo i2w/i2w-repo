@@ -77,7 +77,7 @@ module I2w
         class FooRecord < Record; end
 
         class Controller
-          Repo.register_class self, :controller do
+          Repo.register_class self do
             def group_name = name.sub(/Controller\z/, '').singularize
 
             def group_lookup(type, *args)

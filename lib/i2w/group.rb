@@ -27,8 +27,8 @@ module I2w
       MissingClass.new(e, group_name, type, *args)
     end
 
-    def register(klass, type, accessors: [], &block)
-      registry[type] = klass
+    def register(klass, type = nil, accessors: [], &block)
+      registry[type] = klass if type
       extension = GeneratedMethods.call(self, type, accessors, &block)
       extension_name = "#{type}_generated_group_methods".camelize
       klass.const_set(extension_name, extension)
@@ -60,14 +60,16 @@ module I2w
             ext.module_eval(&block) if block
 
             ext.define_method(:group) { group }
-            ext.define_method(:group_type) { type }
             ext.define_method(:group_name=) { |name| define_singleton_method(:group_name) { name.to_s } }
             ext.module_eval { private :group, :group_name= }
 
-            def_accessors(ext, group, accessors)
+            if type
+              ext.define_method(:group_type) { type }
+              def_group_name(ext, type)      unless ext.method_defined?(:group_name)
+              def_from_group_name(ext, type) unless ext.method_defined?(:from_group_name)
+            end
 
-            def_group_name(ext, type)      unless ext.method_defined?(:group_name)
-            def_from_group_name(ext, type) unless ext.method_defined?(:from_group_name)
+            def_accessors(ext, group, accessors)
           end
         end
 
