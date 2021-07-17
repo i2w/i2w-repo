@@ -15,6 +15,23 @@ module I2w
     alias to_h to_hash
 
     class << self
+      def has_many(name, scope = nil, class_name: nil, foreign_key: nil, **options)
+        class_name ||= "#{name.to_s.singularize.camelize}Record"
+        foreign_key ||= model_name.to_s.foreign_key.sub(/_record_id\z/, '_id')
+        super(name, scope, class_name: class_name, foreign_key: foreign_key, **options)
+      end
+
+      def has_one(name, scope = nil, class_name: nil, foreign_key: nil,  **options)
+        class_name ||= "#{name.to_s.camelize}Record"
+        foreign_key ||= model_name.to_s.foreign_key.sub(/_record_id\z/, '_id')
+        super(name, scope, class_name: class_name, foreign_key: foreign_key, **options)
+      end
+
+      def belongs_to(name, scope = nil, class_name: nil, **options)
+        class_name ||= "#{name.to_s.camelize}Record"
+        super(name, scope, class_name: class_name, **options)
+      end
+
       private
 
       # remove '_records' suffix from computed table_name
