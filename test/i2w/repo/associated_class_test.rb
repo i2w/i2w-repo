@@ -80,7 +80,7 @@ module I2w
           Repo.register_class self do
             def group_name = name.sub(/Controller\z/, '').singularize
 
-            def group_lookup(type, *args)
+            def group_lookup(group_name, type, *args)
               result = Repo.lookup group_name, type, *args
               return result if result.is_a?(Class)
 

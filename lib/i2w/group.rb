@@ -16,12 +16,10 @@ module I2w
     end
 
     def group_lookup(from, type, *args)
-      return from.group_lookup(type, *args) if from.respond_to?(:group_lookup)
+      group_name = from.respond_to?(:group_name) ? from.group_name : from.to_s
+      return from.group_lookup(group_name, type, *args) if from.respond_to?(:group_lookup)
 
       klass = registry.fetch(type)
-      raise "Implement #from_group_name on #{klass} singleton" unless klass.respond_to?(:from_group_name)
-
-      group_name = from.respond_to?(:group_name) ? from.group_name : from.to_s
       klass.from_group_name(group_name, *args)
     rescue NameError => e
       MissingClass.new(e, group_name, type, *args)
