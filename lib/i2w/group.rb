@@ -9,17 +9,18 @@ module I2w
       @registry = {}
     end
 
-    def lookup(from, type, *args)
+    def lookup(from, type, *args, registry: nil)
       return from.send("#{type}_class", *args) if from.respond_to?("#{type}_class")
 
-      group_lookup(from, type, *args)
+      group_lookup(from, type, *args, registry: registry)
     end
 
-    def group_lookup(from, type, *args)
+    def group_lookup(from, type, *args, registry: nil)
       group_name = from.respond_to?(:group_name) ? from.group_name : from.to_s
       return from.group_lookup(group_name, type, *args) if from.respond_to?(:group_lookup)
 
-      klass = registry.fetch(type)
+      klass = registry[type] if registry
+      klass ||= self.registry.fetch(type)
       klass.from_group_name(group_name, *args)
     rescue NameError => e
       MissingClass.new(e, group_name, type, *args)
@@ -34,18 +35,19 @@ module I2w
     end
 
     class MissingClass #:nodoc:
-      attr_reader :exception, :group_name, :args
+      attr_reader :exception, :group_name, :type, :args
 
-      def initialize(exception, group_name, *args)
+      def initialize(exception, group_name, type, *args)
         @exception = exception
         @group_name = group_name
+        @type = type
         @args = args
       end
 
       def method_missing(method, ...)
         raise @exception
       rescue StandardError => e
-        raise "Undefined #{group_name} #{args.join(',')} received ##{method}\nOrigin: #{e.message}"
+        raise "Undefined #{[group_name, type, *args].join(',')} received ##{method}\nOrigin: #{e.message}"
       end
 
       def respond_to_missing?(...) = true

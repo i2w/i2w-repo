@@ -42,30 +42,30 @@ module I2w
           def group_name = name.deconstantize.singularize
 
           def from_group_name(group_name, action_name)
-            action_class_candidates(group_name, action_name).each do |class_name|
-              return class_name.constantize
-            rescue NameError
-              nil
-            end
-            raise NameError, "can't find action, searched: #{action_class_candidates(group_name, action_name)}"
+            "#{group_name.pluralize}::#{action_name.to_s.camelize}Action".constantize
+          rescue NameError
+            on_missing_action(action_name)
           end
 
-          private
-
-          def action_class_candidates(group_name, action_name)
-            parts = group_name.pluralize.split('::')
-            parts.length.times.map { [*parts[0..-_1], "#{action_name.to_s.camelize}Action"].join('::') }
+          def on_missing_action(action_name)
+            Defaults.const_get("#{action_name.to_s.camelize}Action")
           end
         end
       end
 
-      class ShowAction < Action; end
+      module Defaults
+        class ShowAction < Action; end
+      end
 
       module Foos
         class EditAction < Action; end
       end
 
       module Backend
+        class Action < AssociatedClassTest::Action
+          def self.on_missing_action(action_name) = Backend.const_get("#{action_name.to_s.camelize}Action")
+        end
+
         class NewAction < Action; end
 
         class EditAction < Action; end
@@ -81,10 +81,10 @@ module I2w
             def group_name = name.sub(/Controller\z/, '').singularize
 
             def group_lookup(group_name, type, *args)
-              result = Repo.lookup group_name, type, *args
+              result = Repo.lookup group_name, type, *args, registry: { action: Action }
               return result if result.is_a?(Class)
 
-              Repo.lookup(group_name.sub('::Backend::', '::'), type, *args)
+              Repo.lookup(group_name.sub('::Backend::', '::'), type, *args, registry: { action: Action })
             end
           end
         end
@@ -95,7 +95,10 @@ module I2w
       test 'lookup classes based on action lookup scheme' do
         assert_equal Foo,              Repo.lookup(Foos::EditAction, :model)
         assert_equal Foos::EditAction, Repo.lookup(Foo, :action, :edit)
-        assert_equal ShowAction,       Repo.lookup(Foo, :action, :show)
+      end
+
+      test 'lookup with on_missing_action fallback' do
+        assert_equal Defaults::ShowAction, Repo.lookup(Foo, :action, :show)
       end
 
       test 'lookup in namespaces based on action lookup scheme' do
@@ -104,7 +107,8 @@ module I2w
         assert_equal FooRepository,             Repo.lookup(Backend::FoosController, :repository)
         assert_equal Backend::Foos::NewAction,  Repo.lookup(Backend::FoosController, :action, :new)
         assert_equal Backend::EditAction,       Repo.lookup(Backend::FoosController, :action, :edit)
-        assert_equal ShowAction,                Repo.lookup(Backend::FoosController, :action, :show)
+        
+        assert_equal Group::MissingClass, Repo.lookup(Backend::FoosController, :action, :show).class
       end
     end
   end
