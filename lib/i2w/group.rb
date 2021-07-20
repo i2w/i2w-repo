@@ -47,7 +47,7 @@ module I2w
       def method_missing(method, ...)
         raise @exception
       rescue StandardError => e
-        raise "Undefined #{[group_name, type, *args].join(',')} received ##{method}\nOrigin: #{e.message}"
+        raise "Undefined #{[group_name, type, *args].join(', ')} received ##{method}\nOrigin: #{e.message}"
       end
 
       def respond_to_missing?(...) = true

@@ -17,7 +17,7 @@ module I2w
     #   # => Result::Success(User(...))
     class ResultProxy
       def initialize(repository_class, input_class)
-        @repository = repository_class.new
+        @repository = repository_class
         @input_class = input_class
       end
 
