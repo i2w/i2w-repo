@@ -24,7 +24,7 @@ module I2w
         @processed << arg
       end
 
-      def missing
+      def else
         @processed.concat (@args - @processed).each { @result = yield(_1, @result) }
       end
 
@@ -50,7 +50,7 @@ module I2w
         @processed << arg
       end
 
-      def missing
+      def else
         @processed.concat (@args.keys - @processed).each { @result = yield(_1, @args[_1], @result) }
       end
 

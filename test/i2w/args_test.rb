@@ -8,7 +8,7 @@ class I2w::ArgsTest < ActiveSupport::TestCase
       on.a { |r| r.merge(a: "handled") }
       on.b { |r| r.merge(b: "handled") }
       on.d { |r| r.merge(d: "not run") }
-      on.missing { |a, r| r.merge(a => "missing") }
+      on.else { |a, r| r.merge(a => "missing") }
     end
 
     assert_equal({ a: "handled", b: "handled", c: "missing", e: "missing" }, actual)
@@ -21,7 +21,7 @@ class I2w::ArgsTest < ActiveSupport::TestCase
       on.a { actual[:a] = "handled" }
       on.b { actual[:b] = "handled" }
       on.d { actual[:d] = "not run" }
-      on.missing { |a| actual[a] = "missing" }
+      on.else { |a| actual[a] = "missing" }
     end
 
     assert_equal({ a: "handled", b: "handled", c: "missing", e: "missing" }, actual)
@@ -52,7 +52,7 @@ class I2w::ArgsTest < ActiveSupport::TestCase
       on.a { |v, r| r.merge(a: "handled #{v}") }
       on.b { |v, r| r.merge(b: "handled #{v}") }
       on.d { |v, r| r.merge(d: "not run") }
-      on.missing { |a, v, r| r.merge(a => "missing #{v}") }
+      on.else { |a, v, r| r.merge(a => "missing #{v}") }
     end
 
     assert_equal({ a: "handled 1", b: "handled 2", c: "missing 3", e: "missing 4" }, actual)
@@ -65,7 +65,7 @@ class I2w::ArgsTest < ActiveSupport::TestCase
       on.a { |v| actual[:a] = "handled #{v}" }
       on.b { |v| actual[:b] = "handled #{v}" }
       on.d { |v| actual[:d] = "not run" }
-      on.missing { |a, v| actual[a] = "missing #{v}" }
+      on.else { |a, v| actual[a] = "missing #{v}" }
     end
 
     assert_equal({ a: "handled 1", b: "handled 2", c: "missing 3", e: "missing 4" }, actual)
