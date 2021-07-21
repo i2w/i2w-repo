@@ -1,4 +1,8 @@
+# frozen_string_literal: true
+
 module I2w
+  # interface for composing a result given an array of symbols, or hash or symbols with values
+  # TODO: better name, move into own repository
   class Args
     def self.call(args, result = nil, &block)
       dsl = args.is_a?(Hash) ? HashDSL.new(args, result) : ArrayDSL.new([*args], result)
