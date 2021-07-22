@@ -36,17 +36,16 @@ module I2w
         input = kwargs[:input] || {}
         input = input.respond_to?(:to_input) ? input.to_input : @input_class.new(input)
         input.errors = result.errors
-        model = attempt_load_model(kwargs[:id]) if kwargs[:id] && result.failure != :not_found
+        model = attempt_load_model(kwargs) if kwargs[:id] && result.failure != :not_found
         input = Input::WithModel.new(input, model) if model
         Result.failure(input)
       end
 
-      # rubocop:disable Lint/SuppressedException
-      def attempt_load_model(id)
-        @repository.find(id: id)
+      def attempt_load_model(kwargs)
+        @repository.find(**kwargs.slice(:id, :to_model))
       rescue ActiveRecord::ActiveRecordError
+        nil
       end
-      # rubocop:enable Lint/SuppressedException
     end
   end
 end
