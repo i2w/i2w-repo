@@ -42,7 +42,9 @@ module I2w
       end
 
       def attempt_load_model(kwargs)
-        @repository.find(**kwargs.slice(:id, :to_model))
+        id = kwargs.fetch(:id)
+        to_model = kwargs.fetch(:to_model, {})
+        @repository.find(id: id, **to_model)
       rescue ActiveRecord::ActiveRecordError
         nil
       end
