@@ -35,6 +35,15 @@ module I2w
       assert_equal 'Bar', Bar.model_name.human
       assert_equal 'Persisted foo', PersistedFoo.model_name.human
     end
+
+    test 'equality for persisted model depends on id' do
+      assert_equal PersistedFoo.from(id: 1), PersistedFoo.from(id: 1)
+      assert_not_equal PersistedFoo.from(id: 1), PersistedFoo.from(id: 2)
+    end
+
+    test 'equality for non persisted model depends on attributes' do
+      assert_equal Bar.new(name: 'foo'), Bar.new(name: 'foo')
+      assert_not_equal Bar.new(name: 'foo'), Bar.new(name: 'bar')
+    end
   end
 end
-

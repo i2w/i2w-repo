@@ -26,6 +26,10 @@ module I2w
     extend ActiveModel::Naming
     include ActiveModel::Conversion
 
+    def ==(other) = other.is_a?(self.class) && other.attributes == attributes
+
+    alias eql? ==
+
     def persisted?
       false
     end
@@ -38,6 +42,10 @@ module I2w
       attribute :id
       attribute :updated_at
       attribute :created_at
+
+      def ==(other) = other.is_a?(self.class) && other.id == id
+
+      alias eql? ==
 
       def persisted?
         true
