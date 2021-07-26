@@ -40,11 +40,9 @@ module I2w
     alias to_hash attributes
     alias to_h attributes
 
-    def to_input = self
-
     def persisted? = false
 
-    def with(**attrs) = WithAttributes.new(dup, **attrs)
+    def with(attrs = {}) = WithAttributes.new(dup, **attrs)
 
     class Error < RuntimeError; end
 

@@ -65,10 +65,21 @@ module I2w
 
     test '.with(attrs)' do
       input = FooInput.new(foo: 'bar', faz: 'faz')
-      with_attrs = input.with(bar: 'foo', faz: 'OVERIDDEN')
+      actual = input.with(bar: 'foo', faz: 'OVERIDDEN')
 
-      assert_equal({ foo: 'bar', faz: 'OVERIDDEN', bar: 'foo'}, with_attrs.to_hash)
-      assert_equal 'Foo input', with_attrs.model_name.human
+      assert_equal({ foo: 'bar', faz: 'OVERIDDEN', bar: 'foo'}, { **actual })
+      assert_equal 'Foo input', actual.model_name.human
+
+      model = Foo.new(foo: 'OVERRIDDEN')
+      actual = input.with(model)
+      assert_equal({ foo: 'OVERRIDDEN', faz: 'faz' }, { **actual })
+    end
+
+    test '.with(attrs).with(other) works as expected' do
+      input = FooInput.new(foo: 'bar', faz: 'faz')
+      actual = input.with(bar: 'bar').with(foo: 'OVERRIDDEN').with(bang: 'bang')
+
+      assert_equal({ foo: 'OVERRIDDEN', faz: 'faz', bar: 'bar', bang: 'bang' }, { **actual })
     end
   end
 end
