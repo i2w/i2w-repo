@@ -3,6 +3,7 @@
 require 'active_model'
 require 'i2w/data_object'
 require_relative 'input/with_model'
+require_relative 'input/with_attributes'
 
 module I2w
   # Input base class.
@@ -46,6 +47,8 @@ module I2w
     def to_input = self
 
     def persisted? = false
+
+    def with_attributes(**attrs) = WithAttributes.new(dup, **attrs)
 
     class Error < RuntimeError; end
 

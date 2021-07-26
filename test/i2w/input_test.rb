@@ -70,5 +70,13 @@ module I2w
       assert_equal model, input_with_model.model
       assert_equal 'bar', input_with_model.input.foo
     end
+
+    test '.with_attributes(attrs)' do
+      input = FooInput.new(foo: 'bar', faz: 'faz')
+      with_attrs = input.with_attributes(bar: 'foo', faz: 'OVERIDDEN')
+
+      assert_equal({ foo: 'bar', faz: 'OVERIDDEN', bar: 'foo'}, with_attrs.to_hash)
+      assert_equal 'Foo input', with_attrs.model_name.human
+    end
   end
 end
