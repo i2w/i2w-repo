@@ -28,17 +28,24 @@ module I2w
         convert_failure_to_input_failure(result, ...)
       end
 
-      def respond_to_missing?(...)
-        @repository.respond_to?(...)
-      end
+      def respond_to_missing?(...) = @repository.respond_to?(...)
 
       def convert_failure_to_input_failure(result, *_args, **kwargs)
-        input = kwargs[:input] || {}
-        input = input.respond_to?(:to_input) ? input.to_input : @input_class.new(input)
-        input.errors = result.errors
+        input = input_with_result_errors(result, kwargs)
         model = attempt_load_model(kwargs) if kwargs[:id] && result.failure != :not_found
         input = Input::WithModel.new(input, model) if model
         Result.failure(input)
+      end
+
+      def input_with_result_errors(result, kwargs)
+        input = kwargs[:input] || {}
+        input = begin
+          input.respond_to?(:to_input) ? input.to_input : @input_class.new(input)
+        rescue ArgumentError
+          Input.new
+        end
+        input.errors = result.errors
+        input
       end
 
       def attempt_load_model(kwargs)
