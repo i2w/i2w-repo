@@ -39,13 +39,15 @@ module I2w
 
       def input_with_result_errors(result, kwargs)
         input = kwargs[:input] || {}
-        input = begin
-          input.respond_to?(:to_input) ? input.to_input : @input_class.new(input)
-        rescue ArgumentError
-          Input.new
-        end
+        input = input.respond_to?(:to_input) ? input.to_input : new_input(kwargs)
         input.errors = result.errors
         input
+      end
+
+      def new_input(kwargs)
+        @input_class.new(input)
+      rescue ArgumentError
+        Input.new
       end
 
       def attempt_load_model(kwargs)
