@@ -63,9 +63,9 @@ module I2w
       assert_equal Foo, Repo.lookup(FooInput, :model)
     end
 
-    test '.with_attributes(attrs)' do
+    test '.with(attrs)' do
       input = FooInput.new(foo: 'bar', faz: 'faz')
-      with_attrs = input.with_attributes(bar: 'foo', faz: 'OVERIDDEN')
+      with_attrs = input.with(bar: 'foo', faz: 'OVERIDDEN')
 
       assert_equal({ foo: 'bar', faz: 'OVERIDDEN', bar: 'foo'}, with_attrs.to_hash)
       assert_equal 'Foo input', with_attrs.model_name.human

@@ -33,7 +33,6 @@ module I2w
       def convert_failure_to_input_failure(result, *_args, **kwargs)
         input = input_with_result_errors(result, kwargs)
         model = attempt_load_model(kwargs) if kwargs[:id] && result.failure != :not_found
-        input = Input::WithModel.new(input, model) if model
         Result.failure(input)
       end
 

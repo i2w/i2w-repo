@@ -44,7 +44,7 @@ module I2w
 
     def persisted? = false
 
-    def with_attributes(**attrs) = WithAttributes.new(dup, **attrs)
+    def with(**attrs) = WithAttributes.new(dup, **attrs)
 
     class Error < RuntimeError; end
 
