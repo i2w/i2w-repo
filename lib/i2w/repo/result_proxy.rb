@@ -31,30 +31,16 @@ module I2w
       def respond_to_missing?(...) = @repository.respond_to?(...)
 
       def convert_failure_to_input_failure(result, *_args, **kwargs)
-        input = input_with_result_errors(result, kwargs)
-        model = attempt_load_model(kwargs) if kwargs[:id] && result.failure != :not_found
-        Result.failure(input)
-      end
-
-      def input_with_result_errors(result, kwargs)
         input = kwargs[:input] || {}
-        input = input.respond_to?(:to_input) ? input.to_input : new_input(kwargs)
+        input = input.respond_to?(:valid?) ? input : new_input
         input.errors = result.errors
-        input
+        Result.failure input
       end
 
-      def new_input(kwargs)
-        @input_class.new(input)
+      def new_input
+        @input_class.new
       rescue ArgumentError
         Input.new
-      end
-
-      def attempt_load_model(kwargs)
-        id = kwargs.fetch(:id)
-        to_model = kwargs.fetch(:to_model, {})
-        @repository.find(id: id, **to_model)
-      rescue ActiveRecord::ActiveRecordError
-        nil
       end
     end
   end
