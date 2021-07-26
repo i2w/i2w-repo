@@ -7,12 +7,12 @@ module I2w
     # Proxy that wraps repo calls in a result_wrapper
     #
     # standard use
-    #   UserRepo.new.create user_input
+    #   UserRepo.new.create input: user_input
     #   # => ActiveRecord::NullViolation
     #   # => User(....)
     #
     # with ResultProxy
-    #   ResultProxy.new(UserRepo).create user_input
+    #   ResultProxy.new(UserRepo).create input: user_input
     #   # => Result::Failure(user_input with errors)
     #   # => Result::Success(User(...))
     class ResultProxy
@@ -32,15 +32,15 @@ module I2w
 
       def convert_failure_to_input_failure(result, *_args, **kwargs)
         input = kwargs[:input] || {}
-        input = input.respond_to?(:valid?) ? input : new_input
+        input = input.respond_to?(:valid?) ? input : new_input(input)
         input.errors = result.errors
         Result.failure input
       end
 
-      def new_input
-        @input_class.new
+      def new_input(input)
+        @input_class.new(input)
       rescue ArgumentError
-        Input.new
+        Input.new.with(input)
       end
     end
   end
