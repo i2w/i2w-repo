@@ -2,7 +2,6 @@
 
 require 'active_model'
 require 'i2w/data_object'
-require_relative 'input/with_model'
 require_relative 'input/with_attributes'
 
 module I2w
@@ -14,9 +13,6 @@ module I2w
     include ActiveModel::Conversion
     include ActiveModel::Validations
     include ActiveModel::Validations::Callbacks
-
-    # return an input initialized from a model, and with the model in a tuple object
-    def self.with_model(model) = WithModel.new(new(**model), model)
 
     # we are more permissive with input than a standard DataObject
     def initialize(object = {})

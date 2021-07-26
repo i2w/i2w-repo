@@ -63,14 +63,6 @@ module I2w
       assert_equal Foo, Repo.lookup(FooInput, :model)
     end
 
-    test '.with_model(model)' do
-      model = Foo.new(foo: 'bar')
-      input_with_model = FooInput.with_model(model)
-
-      assert_equal model, input_with_model.model
-      assert_equal 'bar', input_with_model.input.foo
-    end
-
     test '.with_attributes(attrs)' do
       input = FooInput.new(foo: 'bar', faz: 'faz')
       with_attrs = input.with_attributes(bar: 'foo', faz: 'OVERIDDEN')
