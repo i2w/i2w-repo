@@ -10,9 +10,13 @@ module I2w
         super(input)
       end
 
-      def with(attrs = {}) = super(**@attributes, **attrs)
+      def with(attrs = {}) = __getobj__.with(**@attributes, **attrs)
 
-      def attributes = { **super, **@attributes }
+      def attributes = { **__getobj__.attributes, **@attributes }
+
+      alias delegator_class class
+
+      def class = __getobj__.class
 
       alias to_h attributes
       alias to_hash attributes

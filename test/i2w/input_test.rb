@@ -81,5 +81,12 @@ module I2w
 
       assert_equal({ foo: 'OVERRIDDEN', faz: 'faz', bar: 'bar', bang: 'bang' }, { **actual })
     end
+
+    test '.with(attrs).class returns the original class' do
+      actual = FooInput.new(foo: 'bar', faz: 'faz').with(bar: 'bar')
+
+      assert_equal FooInput, actual.class
+      assert_equal Input::WithAttributes, actual.delegator_class
+    end
   end
 end
