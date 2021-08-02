@@ -24,17 +24,22 @@ module I2w
       errors.copy!(other)
     end
 
+    # we don't support rails validation contexts, just make a different input class
     def valid?(context = nil)
       raise ValidationContextUnsupportedError unless context.nil?
 
       super
     end
 
+    # the attributes intended for output, this method will return valid and inavlid attributes,
+    # used by the #attributes method which ensures attributes are valid
+    def attributes_hash = attribute_names.to_h { [_1, send(_1)] }
+
     # we raise an error if we attempt to access attributes on an invalid input
     def attributes
       raise InvalidAttributesError unless valid?
 
-      super
+      attributes_hash
     end
 
     alias to_hash attributes
