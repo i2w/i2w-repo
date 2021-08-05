@@ -6,7 +6,7 @@ module I2w
   class Args
     def self.call(args, result = nil, &block)
       dsl = args.is_a?(Hash) ? HashDSL.new(args, result) : ArrayDSL.new([*args], result)
-      dsl.instance_eval(&block) if block
+      block.call(dsl) if block
       dsl.result
     end
 

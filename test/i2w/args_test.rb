@@ -79,4 +79,11 @@ class I2w::ArgsTest < ActiveSupport::TestCase
     end
   end
 
+  test 'block binding for inner blocks should be the normal block' do
+    define_singleton_method(:foo) { |a1, a2| "foo #{a1} #{a2}" }
+    actual = I2w::Args.call({a: 1}) do |on|
+      on.a { foo(1, 2) }
+    end
+    assert_equal 'foo 1 2', actual
+  end
 end
