@@ -18,18 +18,22 @@ module I2w
     class ResultProxy
       def initialize(repository_class, input_class)
         @repository     = repository_class
-        @result_wrapper = repository_class.result_wrapper
+        @result_wrapper = repository_class::ResultWrapper
         @input_class    = input_class
       end
 
-      def method_missing(method, ...)
-        result = @result_wrapper.call { @repository.send(method, ...) }
-        return result if result.success?
-
-        convert_failure_to_input_failure(result, ...)
+      def method_missing(...)
+        result = repository_result(...)
+        result.success? ? result : convert_failure_to_input_failure(result, ...)
       end
 
       def respond_to_missing?(...) = @repository.respond_to?(...)
+
+      private
+
+      def repository_result(method, ...)
+        @result_wrapper.call { @repository.send(method, ...) }
+      end
 
       def convert_failure_to_input_failure(result, *_args, **kwargs)
         input = kwargs[:input] || {}

@@ -15,6 +15,8 @@ module I2w
 
     ResultWrapper = Repo::ResultWrapper
 
+    ResultProxy = Repo::ResultProxy
+
     class << self
       def new = raise("#{name} is a singleton object, call methods on the class itself")
 
@@ -46,8 +48,6 @@ module I2w
       def to_model(record)
         attributes_to_model(**record)
       end
-
-      def result_wrapper = self::ResultWrapper
 
       private
 

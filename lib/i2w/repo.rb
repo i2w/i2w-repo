@@ -29,7 +29,7 @@ module I2w
 
       memoize def lookup(...) = group.lookup(...)
 
-      memoize def new_result_proxy(...) = ResultProxy.new(...)
+      memoize def new_result_proxy(repository_class, input_class) = repository_class::ResultProxy.new(repository_class, input_class)
 
       def register_class(...) = group.register(...)
     end
