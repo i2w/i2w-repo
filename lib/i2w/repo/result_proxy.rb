@@ -36,7 +36,7 @@ module I2w
       end
 
       def convert_failure_to_input_failure(result, *_args, **kwargs)
-        input = kwargs[:input] || {}
+        input = kwargs[:input] || kwargs[:by] || {}
         input = input.respond_to?(:valid?) ? input : new_input(input)
         input.errors = result.errors
         Result.failure input
