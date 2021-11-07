@@ -12,14 +12,16 @@ module I2w
 
       def with(attrs = {}) = __getobj__.with(**@attributes, **attrs)
 
+      def attributes_hash = { **__getobj__.attributes_hash, **@attributes }
+
       def attributes = { **__getobj__.attributes, **@attributes }
+
+      alias to_h attributes
+      alias to_hash attributes
 
       alias delegator_class class
 
       def class = __getobj__.class
-
-      alias to_h attributes
-      alias to_hash attributes
     end
   end
 end

@@ -74,6 +74,7 @@ module I2w
 
       model = Foo.new(foo: 'OVERRIDDEN')
       actual = input.with(model)
+      assert_equal({ foo: 'OVERRIDDEN', faz: 'faz' }, actual.attributes_hash)
       assert_equal({ foo: 'OVERRIDDEN', faz: 'faz' }, { **actual })
     end
 
