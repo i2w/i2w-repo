@@ -23,25 +23,20 @@ module I2w
 
         private
 
-        def not_found_failure(_exception)
-          failure(:not_found, :id, :not_found)
+        def not_found_failure(exception)
+          Result.failure exception, id: :not_found
         end
 
         def presence_failure(exception)
           # currently only works in postgres
           attribute = exception.message[/column "(\w+)"/, 1] || 'unknown'
-          failure(:db_constraint, attribute, :blank)
+          Result.failure exception, attribute => :blank
         end
 
         def uniqueness_failure(exception)
           # currently only works for postgres
           attribute = exception.message[/Key .*?(\w+)\)?=/, 1] || 'unknown'
-          failure(:db_constraint, attribute, :taken)
-        end
-
-        def failure(failure, attribute, error)
-          errors = ActiveModel::Errors.new(nil).tap { _1.add(attribute, error) }
-          Result.failure(failure, errors)
+          Result.failure exception, attribute => :taken
         end
       end
     end
