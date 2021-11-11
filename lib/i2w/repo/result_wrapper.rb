@@ -24,7 +24,7 @@ module I2w
         private
 
         def not_found_failure(exception)
-          Result.failure exception, base: ":id was not not found"
+          Result.failure exception, "id was not not found"
         end
 
         def presence_failure(exception)
