@@ -29,14 +29,14 @@ module I2w
 
         def presence_failure(exception)
           # currently only works in postgres
-          attribute = exception.message[/column "(\w+)"/, 1] || 'unknown'
-          Result.failure exception, attribute => :blank
+          attribute = exception.message[/column "(\w+)"/, 1]
+          Result.failure exception, attribute ? { attribute => :blank } : exception.message
         end
 
         def uniqueness_failure(exception)
           # currently only works for postgres
-          attribute = exception.message[/Key .*?(\w+)\)?=/, 1] || 'unknown'
-          Result.failure exception, attribute => :taken
+          attribute = exception.message[/Key .*?(\w+)\)?=/, 1]
+          Result.failure exception, attribute ? { attribute => :taken } : exception.message
         end
       end
     end
