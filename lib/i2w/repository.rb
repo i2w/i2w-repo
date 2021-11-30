@@ -49,7 +49,9 @@ module I2w
         attributes_to_model(**record)
       end
 
-      private
+      def attributes_to_model(**attributes)
+        model_class.new(**attributes)
+      end
 
       def transaction(&block)
         # we expect transactions to be nested, so we set sane defaults for this
@@ -59,10 +61,6 @@ module I2w
 
       def rollback!
         raise ActiveRecord::Rollback
-      end
-
-      def attributes_to_model(**attributes)
-        model_class.new(**attributes)
       end
     end
   end

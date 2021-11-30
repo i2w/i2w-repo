@@ -32,7 +32,7 @@ module I2w
       private
 
       def repository_result(method, ...)
-        @result_wrapper.call { @repository.send(method, ...) }
+        @result_wrapper.call { @repository.public_send(method, ...) }
       end
 
       def convert_failure_to_input_failure(result, *_args, **kwargs)
