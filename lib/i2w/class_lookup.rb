@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'i2w/memoize'
 require_relative 'missing_class'
 
 module I2w
@@ -48,10 +47,11 @@ module I2w
     private
 
     def resolve_lookup(lookup, source)
-      return lookup if [String, Class].include?(lookup.class)
+      return lookup if [String, Class, MissingClass].include?(lookup.class)
       return lookup.call if lookup.arity == 0
       raise ArgumentError, "source required for lookup: #{lookup}" if source == NoArg
 
+      source = source.class unless [String, Class, MissingClass].include?(source.class)
       lookup.call source.to_s
     end
   end

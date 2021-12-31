@@ -23,9 +23,9 @@ module I2w
     extend ClassMethods
     include InstanceMethods
 
-    dependency :list_class,       List,                                        public: true
-    dependency :model_class,      class_lookup { _1.sub(/Repo\z/, '') },       public: true
-    dependency :record_class,     class_lookup { _1.sub(/Repo\z/, 'Record') }, public: true
+    dependency :list_class,   List,                                        public: true
+    dependency :model_class,  class_lookup { _1.sub(/Repo\z/, '') },       public: true
+    dependency :record_class, class_lookup { _1.sub(/Repo\z/, 'Record') }, public: true
 
     def find(id: NoArg, by: NoArg)
       raise ArgumentError, 'pass id: or by:, not both' unless ([id, by] - [NoArg]).size == 1

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require_relative 'class_lookup'
 
 module I2w
@@ -29,7 +30,7 @@ module I2w
       dependencies.add(dep, default)
     end
 
-    def class_lookup(...) = -> { ClassLookup.new(...).call(_1.is_a?(Class) ? _1 : _1.class) }
+    def class_lookup(...) = -> { ClassLookup.new(...).call(_1) }
 
     private
 

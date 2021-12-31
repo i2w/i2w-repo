@@ -33,23 +33,34 @@ module I2w
 
       attr_reader :with
 
+      # returns the active record scope for this repo, use this for finding records
+      #
+      # you can also set the scope for the optional block by passing a scope callable, eg.
+      #
+      #     def recent_posters
+      #       scope -> { joins(:posts).order('posts.created_at': :desc).distinct } do
+      #         all
+      #       end
+      #     end
       def scope(new_scope = NoArg, &block)
         return new_scope(*arg, &block) if new_scope != NoArg && block
         @scope
       end
 
+      # set the scope for the block to that of the passed I2w::List object
       def scope_of_list(list, &block)
         new_scope ->(_) { list.send(:source) }, &block
       end
 
+      # turns a successful record_result into a model
       def model_result(...) = record_result(...).and_then { model _1 }
 
+      # run the block, translating any Exceptions into failures, if input (first argument) is passed, and is
+      # an I2w::Input, any errors will be added to that, and that is returned as the failure
+      #
+      # pass transaction: true to run the block inside a transaction
       def record_result(input = nil, transaction: false, &block)
-        result = if transaction
-                   transaction { exceptions.wrap(&block) }
-                 else
-                   exceptions.wrap(&block)
-                 end
+        result = transaction ? self.transaction { exceptions.wrap(&block) } : exceptions.wrap(&block)
 
         return result if result.success? || !input.respond_to?(:valid?)
 
