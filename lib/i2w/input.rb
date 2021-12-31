@@ -7,8 +7,6 @@ require_relative 'input/with_attributes'
 module I2w
   # Input base class.
   class Input < DataObject::Mutable
-    I2w::Repo.register_class self, :input
-
     extend ActiveModel::Callbacks
     include ActiveModel::Conversion
     include ActiveModel::Validations
@@ -44,6 +42,8 @@ module I2w
 
     alias to_hash attributes
     alias to_h attributes
+
+    delegate :[], to: :attributes_hash
 
     def persisted? = false
 

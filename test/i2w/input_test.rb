@@ -31,6 +31,7 @@ module I2w
       assert_raises(Input::InvalidAttributesError) { input.attributes }
       assert_raises(Input::InvalidAttributesError) { { **input } }
       assert_equal({ foo: 'baa baa black sheep', faz: nil }, input.attributes_hash)
+      assert_equal 'baa baa black sheep', input[:foo]
     end
 
     test 'unknown, empty or partial input via #new creates an Input' do
@@ -59,10 +60,6 @@ module I2w
 
       assert_equal({ foo: 'bar', faz: 'BAZ' }, patched_by_hash.attributes)
       assert_equal({ foo: 'bar', faz: 'BAZ' }, patched_by_kwargs.attributes)
-    end
-
-    test 'model_class' do
-      assert_equal Foo, Repo.lookup(FooInput, :model)
     end
 
     test '.with(attrs)' do

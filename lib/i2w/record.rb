@@ -3,15 +3,13 @@
 require 'active_record'
 
 module I2w
-  # record base class
+  # record base class, expects database tables to not have _records suffix
+  # Also allows specifying has_many, has_one, belongs_to by the model name only
   class Record < ActiveRecord::Base
-    Repo.register_class self, :record
-
     self.abstract_class = true
 
-    def to_hash
-      attributes.symbolize_keys
-    end
+    def to_hash = attributes.symbolize_keys
+
     alias to_h to_hash
 
     class << self

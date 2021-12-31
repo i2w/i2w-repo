@@ -1,5 +1,5 @@
 module I2w
-  module Repo
+  class Repo
     VERSION = '0.1.0'
   end
 end

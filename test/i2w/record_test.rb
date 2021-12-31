@@ -4,60 +4,38 @@ require 'test_helper'
 
 module I2w
   class RecordTest < ActiveSupport::TestCase
-    class Foo; end
+    truncate_tables
 
-    class FooRecord < Record
-      has_many :bars
-      has_one :baz
-    end
-
-    class Abstract < Record
-      self.abstract_class = true
-    end
-
-    class BarRecord < Abstract
-      belongs_to :foo
-    end
-
-    class BazRecord < Record
-      belongs_to :foo
-
-      self.table_name = 'bazzes'
-
-      self.group_name = Foo
+    test 'double splat returns attributes' do
+      u = UserRecord.create!(email: 'fred@mail.com')
+      assert_equal({id: u.id, email: u.email, name: nil, updated_at: u.updated_at, created_at: u.created_at}, { **u })
     end
 
     test 'table_name defaults to standard active record table name, but can be overridden' do
-      assert_equal 'foos', FooRecord.table_name
-      assert_equal 'bars', BarRecord.table_name
-      assert_equal 'bazzes', BazRecord.table_name
-    end
-
-    test 'associated classes' do
-      assert_equal Foo, Repo.lookup(FooRecord, :model)
-      assert_equal Foo, Repo.lookup(BazRecord, :model)
-      assert_equal FooRecord, Repo.lookup('I2w::RecordTest::Foo', :record)
+      assert_equal 'users', UserRecord.table_name
+      assert_equal 'posts', PostRecord.table_name
+      assert_equal 'comments', ReactionRecord.table_name
     end
 
     test 'has_many' do
-      reflection = FooRecord.reflect_on_association(:bars)
+      reflection = UserRecord.reflect_on_association(:posts)
       assert_equal ActiveRecord::Reflection::HasManyReflection, reflection.class
-      assert_equal 'BarRecord', reflection.class_name
-      assert_equal 'foo_id', reflection.foreign_key
+      assert_equal 'PostRecord', reflection.class_name
+      assert_equal 'user_id', reflection.foreign_key
     end
 
     test 'has_one' do
-      reflection = FooRecord.reflect_on_association(:baz)
+      reflection = UserRecord.reflect_on_association(:last_post)
       assert_equal ActiveRecord::Reflection::HasOneReflection, reflection.class
-      assert_equal 'BazRecord', reflection.class_name
-      assert_equal 'foo_id', reflection.foreign_key
+      assert_equal 'PostRecord', reflection.class_name
+      assert_equal 'user_id', reflection.foreign_key
     end
 
     test 'belongs_to' do
-      reflection = BarRecord.reflect_on_association(:foo)
+      reflection = ReactionRecord.reflect_on_association(:post)
       assert_equal ActiveRecord::Reflection::BelongsToReflection, reflection.class
-      assert_equal 'FooRecord', reflection.class_name
-      assert_equal 'foo_id', reflection.foreign_key
+      assert_equal 'PostRecord', reflection.class_name
+      assert_equal 'post_id', reflection.foreign_key
     end
   end
 end

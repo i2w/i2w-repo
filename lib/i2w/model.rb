@@ -17,12 +17,6 @@ module I2w
   #
   # You may create aggregate, or non persisted models by inheriting from I2w::Model, or adding another base class
   class Model < DataObject::Immutable
-    Repo.register_class self, :model do
-      def group_name = name
-
-      def from_group_name(group_name) = group_name.constantize
-    end
-
     extend ActiveModel::Naming
     include ActiveModel::Conversion
 

@@ -1,13 +1,13 @@
 GIT
   remote: https://github.com/i2w/i2w-data_object.git
-  revision: 15cdfdff9794d0c3c5cb791e599d246670151c4c
+  revision: 944260a4d68a0d477974eebba227ad9cd0e3fb5d
   branch: main
   specs:
     i2w-data_object (0.1.0)
 
 GIT
   remote: https://github.com/i2w/i2w-result.git
-  revision: 97b91010948f783659fd9ee150981d4076bacd55
+  revision: 55b6a5325094adc9c148a75ae195906a5774fe7f
   branch: main
   specs:
     i2w-result (0.1.0)
@@ -21,30 +21,30 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activemodel (6.1.4.1)
-      activesupport (= 6.1.4.1)
-    activerecord (6.1.4.1)
-      activemodel (= 6.1.4.1)
-      activesupport (= 6.1.4.1)
-    activesupport (6.1.4.1)
+    activemodel (7.0.0)
+      activesupport (= 7.0.0)
+    activerecord (7.0.0)
+      activemodel (= 7.0.0)
+      activesupport (= 7.0.0)
+    activesupport (7.0.0)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
       tzinfo (~> 2.0)
-      zeitwerk (~> 2.3)
     byebug (11.1.3)
     coderay (1.1.3)
     concurrent-ruby (1.1.9)
     i18n (1.8.11)
       concurrent-ruby (~> 1.0)
     method_source (1.0.0)
-    minitest (5.14.4)
+    minitest (5.15.0)
     minitest-autotest (1.1.1)
       minitest-server (~> 1.0)
       path_expander (~> 1.0)
     minitest-server (1.0.6)
       minitest (~> 5.0)
     path_expander (1.1.0)
+    pg (1.2.3)
     pry (0.13.1)
       coderay (~> 1.1)
       method_source (~> 1.0)
@@ -53,11 +53,9 @@ GEM
       byebug (>= 9.1, < 12.0)
       pry (~> 0.13.0)
       tty-screen (~> 0.8.1)
-    sqlite3 (1.4.2)
     tty-screen (0.8.1)
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
-    zeitwerk (2.5.1)
 
 PLATFORMS
   x86_64-darwin-20
@@ -68,9 +66,9 @@ DEPENDENCIES
   i2w-repo!
   i2w-result!
   minitest-autotest
+  pg
   rake (>= 13.0.3)
   ruby_jard
-  sqlite3
 
 BUNDLED WITH
-   2.2.15
+   2.2.22
