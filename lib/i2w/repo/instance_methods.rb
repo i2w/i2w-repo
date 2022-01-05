@@ -42,14 +42,21 @@ module I2w
       #         all
       #       end
       #     end
+      #
+      # you can also pass a List object, and its scope will be used, this allows reuse of scopes between list
+      # and finder methods
+      #
+      #     def all_for_user(user_id)
+      #       list scope.where(user_id: user_id)
+      #     end
+      #
+      #     def find_for_user(user_id, **kwargs)
+      #       scope(all_for_user(user_id)) { find(**kwargs) }
+      #     end
       def scope(new_scope = NoArg, &block)
-        return new_scope(*arg, &block) if new_scope != NoArg && block
-        @scope
-      end
+        return new_scope(new_scope, &block) if new_scope != NoArg && block
 
-      # set the scope for the block to that of the passed I2w::List object
-      def scope_of_list(list, &block)
-        new_scope ->(_) { list.send(:source) }, &block
+        @scope
       end
 
       # turns a successful record_result into a model
@@ -74,8 +81,13 @@ module I2w
 
       # create a temporary Repo instance with the new_scope to execute the block in
       def new_scope(new_scope, &block)
+        if new_scope.is_a?(List)
+          new_scope = new_scope.send(:source)
+        else
+          new_scope = new_scope.arity == 1 ? new_scope.call(@scope) : @scope.instance_exec(&new_scope)
+        end
+
         new_instance = dup
-        new_scope = new_scope.arity == 1 ? new_scope.call(@scope) : @scope.instance_exec(&new_scope)
         new_instance.instance_variable_set :@scope, new_scope
         new_instance.instance_exec(&block)
       end

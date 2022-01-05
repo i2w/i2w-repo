@@ -30,7 +30,7 @@ module I2w
       end
 
       def find_for(user_id:, **kwargs)
-        scope_of_list all_for(user_id: user_id) do
+        scope all_for(user_id: user_id) do
           find(**kwargs)
         end
       end
