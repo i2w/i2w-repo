@@ -1,13 +1,14 @@
 GIT
   remote: https://github.com/i2w/i2w-data_object.git
-  revision: 944260a4d68a0d477974eebba227ad9cd0e3fb5d
+  revision: 66ef88b9c995cb63c99bbb9515e6c28ac1233230
   branch: main
   specs:
     i2w-data_object (0.1.0)
+      activemodel (>= 6)
 
 GIT
   remote: https://github.com/i2w/i2w-result.git
-  revision: 55b6a5325094adc9c148a75ae195906a5774fe7f
+  revision: 22a98da2968aaaed1a98aa59be6039a74cb89ac2
   branch: main
   specs:
     i2w-result (0.1.0)

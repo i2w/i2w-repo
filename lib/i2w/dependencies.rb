@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'i2w/lazy'
 require_relative 'class_lookup'
 
 module I2w
@@ -73,21 +74,11 @@ module I2w
 
       def keys = @container.keys
 
-      def add(name, default) = @container[name.to_sym] = default
+      def add(name, default) = @container[name.to_sym] = Lazy.new(default)
 
-      def resolve(context, key) = resolve_in_context(context, @container.fetch(key))
+      def resolve(context, key) = @container.fetch(key).resolve(context)
 
       def resolve_all(context) = keys.to_h { [_1, resolve(context, _1)] }
-
-      private
-
-      def resolve_in_context(context, value)
-        value = context.method(value) if value.is_a?(Symbol)
-        return value unless value.respond_to?(:call)
-
-        value = value.method(:call) unless value.respond_to?(:to_proc)
-        value.arity == 0 ? value.call : value.call(context)
-      end
     end
   end
 end
