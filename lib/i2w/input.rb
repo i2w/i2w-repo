@@ -5,16 +5,34 @@ require 'i2w/data_object'
 require_relative 'input/with_attributes'
 
 module I2w
-  # Input base class.
+  # Input base class.  If a record class dependency is declared, and not missing, then types of the attributes
+  # will be inferred from the record, unless specified.
   class Input < DataObject::Mutable
+    extend Dependencies
+    extend DataObject::Extensions::Default
+    extend DataObject::Extensions::Type
     extend ActiveModel::Callbacks
     include ActiveModel::Conversion
     include ActiveModel::Validations
     include ActiveModel::Validations::Callbacks
 
-    # we are more permissive with input than a standard DataObject
-    def initialize(object = {})
-      super(**self.class.to_attributes_hash(object))
+    dependency :record_class, class_lookup { _1.sub(/Input\z/, 'Record') }, public: true
+
+    class << self
+      # we are more permissive with input than a standard DataObject
+      def new(object = {}) = super(**to_attributes_hash(object))
+
+      def record_class? = !record_class.is_a?(I2w::MissingClass)
+
+      private
+
+      def lookup_type(attr, type) = (type.nil? && infer_type_from_record(attr)) || super
+
+      def infer_type_from_record(attr)
+        return unless record_class?
+
+        record_class.attribute_types[attr.to_s] if record_class.attribute_types.include?(attr.to_s)
+      end
     end
 
     # sometimes we need to transfer errors from after validation, such as db contraint errors

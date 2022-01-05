@@ -5,7 +5,7 @@ require 'active_model/conversion'
 
 module I2w
   # base model class, an immutable data object with your app specific behaviour, but no database behaviour, nor
-  # input/validation behaviour.  Typically instantiated by a Repo singleton object for persisted models.
+  # input/validation behaviour.  Typically instantiated by a Repo for persisted models.
   #
   # includes ActiveModel Conversion and Naming
   #
@@ -17,6 +17,8 @@ module I2w
   #
   # You may create aggregate, or non persisted models by inheriting from I2w::Model, or adding another base class
   class Model < DataObject::Immutable
+    extend DataObject::Extensions::Default
+    extend DataObject::Extensions::Type
     extend ActiveModel::Naming
     include ActiveModel::Conversion
 
@@ -24,9 +26,7 @@ module I2w
 
     alias eql? ==
 
-    def persisted?
-      false
-    end
+    def persisted? = false
 
     alias to_hash attributes
     alias to_h attributes
@@ -41,9 +41,7 @@ module I2w
 
       alias eql? ==
 
-      def persisted?
-        true
-      end
+      def persisted? = true
     end
   end
 end

@@ -43,8 +43,7 @@ module I2w
       #       end
       #     end
       #
-      # you can also pass a List object, and its scope will be used, this allows reuse of scopes between list
-      # and finder methods
+      # you can also pass a List object, and its scope will be used, this allows reuse of scopes
       #
       #     def all_for_user(user_id)
       #       list scope.where(user_id: user_id)
