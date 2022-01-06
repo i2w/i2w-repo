@@ -8,6 +8,7 @@ module I2w
   # but will raise an error if any other methods are called on it.
   # You can specify multiple lookups, useful for looking up a specialized class, but falling back to a general class.
   class ClassLookup
+
     def self.call(source, ...)
       new(...).call(source)
     end
@@ -47,11 +48,11 @@ module I2w
     private
 
     def resolve_lookup(lookup, source)
-      return lookup if [String, Class, MissingClass].include?(lookup.class)
+      return lookup if [Symbol, String, Class, MissingClass].include?(lookup.class)
       return lookup.call if lookup.arity == 0
       raise ArgumentError, "source required for lookup: #{lookup}" if source == NoArg
 
-      source = source.class unless [String, Class, MissingClass].include?(source.class)
+      source = source.class unless [Symbol, String, Class, MissingClass].include?(source.class)
       lookup.call source.to_s
     end
   end

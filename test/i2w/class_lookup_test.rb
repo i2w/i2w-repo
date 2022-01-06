@@ -17,6 +17,7 @@ module I2w
       assert_equal FooRecord, ClassLookup.call(Foo.new) { _1 + 'Record' }
       assert_equal FooRecord, ClassLookup.call(MissingClass.new('I2w::ClassLookupTest::Foo')) { _1 + 'Record' }
       assert_equal FooRecord, ClassLookup.call(Foo) { _1.sub(/\z/, 'Record') }
+      assert_equal Foo,       ClassLookup.call(:foo) { "I2w::ClassLookupTest::#{_1.classify}" }
       assert_equal Foo,       ClassLookup.call(FooRecord) { _1.sub 'Record', '' }
       assert_equal Foo,       ClassLookup.call('I2w::ClassLookupTest::FoosRecord') { _1.sub('Record', '').singularize }
       assert_equal Foo,       ClassLookup.call(Foos::IndexAction) { _1.deconstantize.singularize }
