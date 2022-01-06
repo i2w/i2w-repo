@@ -62,7 +62,7 @@ module I2w
       actual = assert_raises I2w::DataObject::UnknownAttributeError do
         FooRepo.find(id: 1234)
       end
-      assert_equal 'Unknown attribute [:four]', actual.message
+      assert_equal 'Unknown attribute four', actual.message
     end
 
     test 'only: and except: attributes are inherited and can be modified/added to' do
