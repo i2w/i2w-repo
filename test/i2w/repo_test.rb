@@ -129,24 +129,22 @@ module I2w
     end
 
     test "repository .with example, #find_for, #all_for" do
-      user_id = UserRepo.create(input: { email: 'fred@email.com' }).value.id
-      post_id = PostRepo.create(input: { user_id: user_id, content: 'My Post' }).value.id
+      user = UserRepo.create(input: { email: 'fred@email.com' }).value
+      post = PostRepo.create(input: { user_id: user.id, content: 'My Post' }).value
 
-      user = UserRepo.find(id: user_id).value
-      assert_equal 'fred@email.com', user.email
-      assert_equal UnloadedAttribute.new(User, :posts), user.posts
+      actual = UserRepo.find(id: user.id).value
+      assert_equal UnloadedAttribute.new(User, :posts), actual.posts
 
-      user_with_posts = UserRepo.with(:posts).find(id: user_id).value
-      assert_equal 'fred@email.com', user_with_posts.email
-      assert_equal [Post.from(id: post_id)], user_with_posts.posts.to_a
+      actual = UserRepo.with(:posts).find(id: user.id).value
+      assert_equal [post], actual.posts.to_a
 
-      next_user_id = UserRepo.create(input: UserInput.new(email: 'jim@email.com')).value.id
-      next_post_id = PostRepo.create(input: { user_id: next_user_id, content: 'Jim Post' }).value.id
+      next_user = UserRepo.create(input: UserInput.new(email: 'jim@email.com')).value
+      next_post = PostRepo.create(input: { user_id: next_user.id, content: 'Jim Post' }).value
 
-      assert [Post.from(id: post_id), Post.from(id: next_post_id)], PostRepo.all.to_a
-      refute PostRepo.find_for(user_id: next_user_id, id: post_id).success?
-      assert PostRepo.find_for(user_id: user_id, id: post_id).success?
-      assert_equal [Post.from(id: post_id)], PostRepo.all_for(user_id: user_id).to_a
+      assert_equal [post, next_post], PostRepo.all.to_a
+      refute PostRepo.find_for(user_id: next_user.id, id: post.id).success?
+      assert PostRepo.find_for(user_id: user.id, id: post.id).success?
+      assert_equal [post], PostRepo.all_for(user_id: user.id).to_a
     end
 
     test 'Input with record_dependency infers types from the record' do
