@@ -22,7 +22,7 @@ module I2w
       # we are more permissive with input than a standard DataObject
       def new(object = {}) = super(**to_attributes_hash(object))
 
-      def record_class? = !record_class.is_a?(I2w::MissingClass)
+      def record_class? = record_class.is_a?(Class)
 
       private
 

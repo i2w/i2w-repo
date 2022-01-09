@@ -96,7 +96,7 @@ module I2w
       assert UserRepo.with(:posts).frozen?
     end
 
-    test 'repository #find(by: Hash)' do
+    test 'repo #find(by: Hash)' do
       user = UserRepo.create(input: { email: 'fred@email.com' }).value
 
       assert_equal user, UserRepo.find(by: { email: 'fred@email.com' }).value
@@ -106,7 +106,7 @@ module I2w
       assert actual.failure.is_a?(ActiveRecord::RecordNotFound)
     end
 
-    test 'repository #find(by: Input)' do
+    test 'repo #find(by: Input)' do
       user = UserRepo.create(input: { email: 'fred@email.com' }).value
 
       assert_equal user, UserRepo.find(by: UserInput.new(email: 'fred@email.com')).value
@@ -118,7 +118,7 @@ module I2w
       assert_match(/Couldn\'t find UserRecord/, actual.errors.full_messages[0])
     end
 
-    test 'repository #find(id:)' do
+    test 'repo #find(id:)' do
       user = UserRepo.create(input: { email: 'fred@email.com' }).value
 
       assert_equal user, UserRepo.find(id: user.id).value
@@ -128,7 +128,7 @@ module I2w
       assert actual.failure.is_a?(ActiveRecord::RecordNotFound)
     end
 
-    test "repository .with example, #find_for, #all_for" do
+    test "repo .with example, #find_for, #all_for" do
       user = UserRepo.create(input: { email: 'fred@email.com' }).value
       post = PostRepo.create(input: { user_id: user.id, content: 'My Post' }).value
 
