@@ -33,10 +33,10 @@ module I2w
       end
 
       def optional(name, loader = name, attributes: { name => loader }, scope: NoArg)
-        attributes = attributes_to_hash(attributes)
+        optional_attributes_hash = to_optional_attributes_hash(attributes)
 
-        always_attributes.concat attributes.keys
-        optional_attributes[name.to_sym] = attributes
+        always_attributes.concat optional_attributes_hash.keys
+        optional_attributes[name.to_sym] = optional_attributes_hash
         optional_scopes[name.to_sym] = scope unless scope == NoArg
       end
 
@@ -75,13 +75,13 @@ module I2w
         end
       end
 
-      def attributes_to_hash(attributes)
+      def to_optional_attributes_hash(attributes)
         return {} if attributes == NoArg
-        return attributes if attributes.is_a?(Hash)
+        return attributes.transform_values(&:to_proc) if attributes.is_a?(Hash)
 
         attributes = Array(attributes)
         last_hash = attributes.last.is_a?(Hash) ? attributes.pop : {}
-        { **attributes.to_h { [_1, _1] }, **last_hash }
+        { **attributes.to_h { [_1, _1.to_proc] }, **last_hash.transform_values(&:to_proc) }
       end
     end
   end

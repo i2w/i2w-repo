@@ -11,7 +11,7 @@ module I2w
       def initialize(extra: {}, only: nil, except: nil, always: nil, on_missing: nil)
         raise ArgumentError, "can't set both only and except" if except && only
 
-        @extra = extra.to_h { [_1, _2.to_proc] }
+        @extra = extra
         @only = [*only] if only
         @except = [*except] if except
         @always = [*always]

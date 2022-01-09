@@ -36,7 +36,7 @@ module I2w
     end
 
     test 'extra attributes are constructed from the record' do
-      to_hash = Record::ToHash.new(extra: { bars: :bars }, except: :secret)
+      to_hash = Record::ToHash.new(extra: { bars: :bars.to_proc }, except: :secret)
       assert_equal({one: 1, two: 2, bars: ['bar1', 'bar2']}, to_hash.call(record))
 
       to_hash = Record::ToHash.new(only: [], extra: { up_bars: -> { _1.bars.map(&:upcase) } })
