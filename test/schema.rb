@@ -20,6 +20,8 @@ ActiveRecord::Schema.define do
   create_table :comments, force: true do |t|
     t.integer :post_id, null: false
     t.integer :user_id
+    t.integer :likes, null: false, default: 0
+    t.boolean :pinned, null: false, default: false
     t.string :content, null: false
     t.timestamps
   end
