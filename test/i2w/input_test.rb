@@ -62,7 +62,7 @@ module I2w
       assert_equal({ foo: 'bar', faz: 'BAZ' }, patched_by_kwargs.attributes)
     end
 
-    test '.with(attrs)' do
+    test '.with(attrs) adds arbitrary attributes to the input, useful for sending extra attrs to Repo methods' do
       input = FooInput.new(foo: 'bar', faz: 'faz')
       actual = input.with(bar: 'foo', faz: 'OVERIDDEN')
 

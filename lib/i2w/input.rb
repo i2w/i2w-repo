@@ -41,11 +41,7 @@ module I2w
     end
 
     # we don't support rails validation contexts, just make a different input class
-    def valid?(context = nil)
-      raise ValidationContextUnsupportedError unless context.nil?
-
-      super
-    end
+    def valid? = super()
 
     # the attributes intended for output, this method will return valid and inavlid attributes,
     # used by the #attributes method which ensures attributes are valid
@@ -70,7 +66,5 @@ module I2w
     class Error < RuntimeError; end
 
     class InvalidAttributesError < Error; end
-
-    class ValidationContextUnsupportedError < Error; end
   end
 end
