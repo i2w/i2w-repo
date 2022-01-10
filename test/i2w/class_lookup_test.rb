@@ -31,11 +31,13 @@ module I2w
       assert_equal Foo, ClassLookup.new(-> { Nope }, Foo).call
       assert_equal Foo, ClassLookup.new('Nope') { 'I2w::ClassLookupTest::Foo' }.call
 
-      error = assert_raises(ArgumentError) { ClassLookup.new }
+      error = assert_raises(ArgumentError) { ClassLookup.new.call }
       assert_equal "No lookups provided", error.message
 
       error = assert_raises(ArgumentError) { ClassLookup.new('Nope', -> { _1 }).call }
       assert_match(/source required for lookup/, error.message)
+
+      assert_equal MissingClass.new('No', 'NilClassNo'), ClassLookup.new('No', -> { "#{_1}No" }).source(nil).call
     end
 
     test 'on_missing' do
@@ -55,6 +57,25 @@ module I2w
       assert_equal MissingClass.new('Foo', 'Bar'), actual
       assert_equal 'Bar', actual.to_s
       assert_equal '#<Missing class: Bar (also tried: Foo)>', actual.inspect
+    end
+
+    test '.resolve(<thing>) examples' do
+      begin self.class.send(:remove_const, :Thing) rescue NameError end
+
+      string = "#{self.class.name}::Thing"
+      lookup = ClassLookup.new { Thing }
+      missing = ClassLookup.call(nil) { Thing }
+
+      assert_equal MissingClass.new("#{self.class.name}::Thing"), ClassLookup.resolve(string)
+      assert_equal MissingClass.new("#{self.class.name}::Thing"), ClassLookup.resolve(lookup)
+      assert_equal MissingClass.new("#{self.class.name}::Thing"), ClassLookup.resolve(missing)
+
+      self.class.const_set :Thing, Class.new
+
+      assert_equal Thing, ClassLookup.resolve(string)
+      assert_equal Thing, ClassLookup.resolve(lookup)
+      assert_equal Thing, ClassLookup.resolve(missing)
+      assert_equal Thing, ClassLookup.resolve(Thing)
     end
   end
 end

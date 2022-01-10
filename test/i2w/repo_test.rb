@@ -19,13 +19,14 @@ module I2w
     UserRecord = ::UserRecord
 
     class UserRepo < Repo
-      optional :posts, -> { PostRepo.models(_1.posts) }, scope: -> { includes(:posts) }
+      optional_list :posts
     end
 
     class PostRepo < Repo
       dependency :record_class, -> { PostRecord }
 
-      optional :reactions, -> { ReactionRepo.list _1.reactions }, scope: -> { includes(:reactions) }
+      optional_model :user
+      optional_list :reactions
 
       def all_for(user_id:)
         list scope.where(user_id: user_id)
@@ -42,6 +43,7 @@ module I2w
       attribute :user_id
       attribute :content
       attribute :reactions
+      attribute :user
     end
 
     class ReactionRepo < Repo

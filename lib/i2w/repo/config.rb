@@ -25,8 +25,6 @@ module I2w
 
       attr_reader :only_attributes, :except_attributes, :always_attributes, :optional_attributes, :optional_scopes
 
-      def optional_keys = optional_attributes.keys
-
       def attributes(only: NoArg, except: NoArg)
         @only_attributes = only unless only == NoArg
         @except_attributes = except unless except == NoArg
@@ -55,8 +53,9 @@ module I2w
 
       # assert that this config defines optionals specified, return array
       def assert_optional!(*with)
-        unknown = with - optional_keys
-        raise ArgumentError, "unnkown: #{unknown.join(', ')} (defined: #{optional_keys.join(', ')})" if unknown.any?
+        with_keys, _ = keys_and_options(with)
+        unknown      = with_keys - optional_attributes.keys
+        raise ArgumentError, "#{unknown.join(', ')} not in #{optional_attributes.keys.join(', ')})" if unknown.any?
 
         with
       end
@@ -64,14 +63,29 @@ module I2w
       private
 
       def attributes_with(with)
-        optional_attributes.slice(*with).values.reduce({}) do |a, extra|
-          a.merge!(extra)
+        with_keys, nested_with = keys_and_options(with)
+
+        optional_attributes.slice(*with_keys).each_with_object({}) do |(key, extra), result|
+          extra.each do |attr, loader|
+            if loader.arity == 2
+              nested_with_for_key = nested_with[key]
+              result[attr] = ->(record) { loader.call(record, nested_with_for_key) }
+            else
+              result[attr] = loader
+            end
+          end
         end
       end
 
       def scope_with(scope, with)
-        optional_scopes.slice(*with).values.reduce(scope) do |s, apply|
-          apply.arity == 1 ? apply.call(s) : s.instance_exec(&apply)
+        with_keys, nested_with = keys_and_options(with)
+
+        optional_scopes.slice(*with_keys).reduce(scope) do |s, (key, apply)|
+          case apply.arity
+          when 2 then apply.call(s, nested_with[key])
+          when 1 then apply.call(s)
+          else        s.instance_exec(&apply)
+          end
         end
       end
 
@@ -82,6 +96,15 @@ module I2w
         attributes = Array(attributes)
         last_hash = attributes.last.is_a?(Hash) ? attributes.pop : {}
         { **attributes.to_h { [_1, _1.to_proc] }, **last_hash.transform_values(&:to_proc) }
+      end
+
+      # given an array with options as last argument, return all keys, and options
+      # eg:
+      #   keys_and_options([:a, :b, c: 1]) # => [[:a, :b, :c], { c: 1 }]
+      def keys_and_options(ary)
+        ary = ary.dup
+        options = ary.last.is_a?(Hash) ? ary.pop : {}
+        [[*ary, *options.keys], options]
       end
     end
   end

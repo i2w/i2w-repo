@@ -25,6 +25,33 @@ module I2w
 
       def exception(exception_class, handler = nil, &block) = exceptions.add(exception_class, block || handler)
 
+      # specify an optional attribute or attributes to load
+      def optional(*args, scope: NoArg, **kwargs)
+        # convert :scope kwarg to a class method call if it is a symbol, then delegate to config
+        kwargs[:scope] = scope.is_a?(Symbol) ? -> { send scope, _1 } : scope
+        config.optional(*args, **kwargs)
+      end
+
+      # specify an optional dependent model to load
+      def optional_model(name, attribute = nil, repo: nil, scope: NoArg)
+        repo ||= ClassLookup.new.source(name)
+                            .on_missing { "#{self.to_s.deconstantize}::#{_1.classify}Repo" }
+                            .on_missing { "#{_1.classify}Repo" }
+
+        optional_for_repo repo, :model, name, attribute, scope
+      end
+
+      # specify an optional dependent list of models to load
+      def optional_list(name, attribute = nil, repo: nil, scope: NoArg)
+        repo ||= ClassLookup.new.source(name)
+                            .on_missing { "#{self.to_s.deconstantize}::#{_1.singularize.classify}Repo" }
+                            .on_missing { "#{_1.singularize.classify}Repo" }
+
+        optional_for_repo repo, :list, name, attribute, scope
+      end
+
+      alias optional_models optional_list
+
       private
 
       memoize def instance = new
@@ -33,10 +60,14 @@ module I2w
 
       delegate :attributes, to: :config
 
-      # convert :scope kwarg to a class method call if it is a symbol, then delegate to config
-      def optional(*args, scope: NoArg, **kwargs)
-        kwargs[:scope] = scope.is_a?(Symbol) ? -> { send scope, _1 } : scope
-        config.optional(*args, **kwargs)
+      def optional_for_repo(repo, meth, name, attribute = nil, scope = NoArg)
+        attribute ||= lambda do |record, with|
+          ClassLookup[repo].with(*with).public_send(meth, record.send(name))
+        end
+
+        scope = ->(scope, with) { scope.includes(name => with) } if scope == NoArg
+
+        optional name, attribute, scope: scope
       end
 
       def inherited(subclass)
