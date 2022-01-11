@@ -79,13 +79,15 @@ module I2w
       delegate :find, :create, :update, :upsert, :destroy, :all, to: :instance
     end
 
-    # Return failure with the exception message for ActiveRecord errors
-    exception ActiveRecord::ActiveRecordError, -> { _1.message }
+    # Return failure with the exception message for not found error
+    exception ActiveRecord::RecordNotFound, -> { _1.message }
 
     # handle postgres RecordNotUnique as :taken error
     exception ActiveRecord::RecordNotUnique do |exception|
       if attribute = exception.message[/Key .*?(\w+)\)?=/, 1]
         { attribute => :taken }
+      else
+        exception.message
       end
     end
 
@@ -93,6 +95,8 @@ module I2w
     exception ActiveRecord::NotNullViolation do |exception|
       if attribute = exception.message[/column "(\w+)"/, 1]
         { attribute => :blank }
+      else
+        exception.message
       end
     end
   end
