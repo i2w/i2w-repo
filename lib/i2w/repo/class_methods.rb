@@ -33,21 +33,36 @@ module I2w
       end
 
       # specify an optional dependent model to load
-      def optional_model(name, attribute = nil, repo: nil, scope: NoArg)
+      def optional_model(name, attribute: nil, repo: nil, scope: NoArg)
         repo ||= ClassLookup.new.source(name)
                             .on_missing { "#{self.to_s.deconstantize}::#{_1.classify}Repo" }
                             .on_missing { "#{_1.classify}Repo" }
 
-        optional_for_repo repo, :model, name, attribute, scope
+        attribute ||= lambda do |record, with|
+          ClassLookup[repo].with(*with).model record.public_send(name)
+        end
+
+        scope = ->(scope, with) { scope.includes(name => with) } if scope == NoArg
+
+        optional name, attribute, scope: scope
       end
 
       # specify an optional dependent list of models to load
-      def optional_list(name, attribute = nil, repo: nil, scope: NoArg)
+      # You may specify the order of the list via the second argument, this will be executed on the List object
+      def optional_list(name, on_list = nil, attribute: nil, repo: nil, scope: NoArg)
         repo ||= ClassLookup.new.source(name)
                             .on_missing { "#{self.to_s.deconstantize}::#{_1.singularize.classify}Repo" }
                             .on_missing { "#{_1.singularize.classify}Repo" }
 
-        optional_for_repo repo, :list, name, attribute, scope
+        attribute ||= lambda do |record, with|
+          list = ClassLookup[repo].with(*with).list record.public_send(name)
+          list = list.instance_exec(&on_list) if on_list
+          list
+        end
+
+        scope = ->(scope, with) { scope.includes(name => with) } if scope == NoArg
+
+        optional name, attribute, scope: scope
       end
 
       alias optional_models optional_list
@@ -59,16 +74,6 @@ module I2w
       attr_reader :config, :exceptions
 
       delegate :attributes, to: :config
-
-      def optional_for_repo(repo, meth, name, attribute = nil, scope = NoArg)
-        attribute ||= lambda do |record, with|
-          ClassLookup[repo].with(*with).public_send(meth, record.send(name))
-        end
-
-        scope = ->(scope, with) { scope.includes(name => with) } if scope == NoArg
-
-        optional name, attribute, scope: scope
-      end
 
       def inherited(subclass)
         subclass.instance_variable_set :@config, config.dup

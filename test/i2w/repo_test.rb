@@ -19,7 +19,7 @@ module I2w
     UserRecord = ::UserRecord
 
     class UserRepo < Repo
-      optional_list :posts
+      optional_list :posts, -> { order(:content) }
     end
 
     class PostRepo < Repo
@@ -147,6 +147,11 @@ module I2w
       refute PostRepo.find_for(user_id: next_user.id, id: post.id).success?
       assert PostRepo.find_for(user_id: user.id, id: post.id).success?
       assert_equal [post], PostRepo.all_for(user_id: user.id).to_a
+
+      another_post = PostRepo.create(input: { user_id: next_user.id, content: 'Another Jim Post' }).value
+      next_user = UserRepo.with(:posts).find(id: next_user).value
+      assert_equal [another_post, next_post], next_user.posts.to_a
+      assert_equal [next_post, another_post], next_user.posts.reorder(content: :desc).to_a
     end
 
     test 'Input with record_dependency infers types from the record' do
