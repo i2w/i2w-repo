@@ -34,6 +34,10 @@ module I2w
         assert_equal 3, list(&source).size
       end
 
+      test "#{desc} #length" do
+        assert_equal 3, list(&source).length
+      end
+
       test "#{desc} #[]" do
         q = list(&source).order(:id)
         assert_equal non, q[1]

@@ -55,7 +55,7 @@ module I2w
     def count = source.count(:all)
 
     # these methods return basic types
-    delegate :pluck, :size, to: :resolved
+    delegate :pluck, :size, :length, to: :resolved
 
     # these methods return nil, object, array of objects
     %i[first last []].each do |meth|
