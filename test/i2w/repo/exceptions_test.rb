@@ -14,23 +14,23 @@ module I2w
           model_result { raise UnhandledError, 'is not handled' }
         end
 
-        def not_found(input: nil)
+        def not_found(input = nil)
           model_result(input) { raise ActiveRecord::RecordNotFound, 'could not find it' }
         end
 
-        def not_null_postgres(input: nil)
+        def not_null_postgres(input = nil)
           model_result(input) { raise ActiveRecord::NotNullViolation, 'null value in column "foo" of relation "bar" violates' }
         end
 
-        def not_null_other(input: nil)
+        def not_null_other(input = nil)
           model_result(input) { raise ActiveRecord::NotNullViolation, 'oops "foo"' }
         end
 
-        def not_unique_postgres(input: nil)
+        def not_unique_postgres(input = nil)
           model_result(input) { raise ActiveRecord::RecordNotUnique, 'Key (foo)=(bar) already exists' }
         end
 
-        def not_unique_other(input: nil)
+        def not_unique_other(input = nil)
           model_result(input) { raise ActiveRecord::RecordNotUnique, 'oops "foo"' }
         end
       end
@@ -63,7 +63,7 @@ module I2w
 
       test 'adds error to input for ActiveRecord::RecordNotFound if passed' do
         input = TestInput.new
-        actual = TestRepo.not_found(input: input)
+        actual = TestRepo.not_found(input)
         assert actual.failure?
         assert actual.failure.is_a?(TestInput)
         assert_equal({ base: [{ error: 'could not find it' }] }, actual.errors.details)
@@ -78,7 +78,7 @@ module I2w
 
       test 'adds error to input for column for ActiveRecord::NotNullViolation with postgres message' do
         input = TestInput.new
-        actual = TestRepo.not_null_postgres(input: input)
+        actual = TestRepo.not_null_postgres(input)
         assert actual.failure?
         assert actual.failure.is_a?(TestInput)
         assert_equal ["can't be blank"], actual.failure.errors[:foo]
@@ -93,7 +93,7 @@ module I2w
 
       test 'adds error for column for ActiveRecord::RecordNotUnique with postgres message' do
         input = TestInput.new
-        actual = TestRepo.not_unique_postgres(input: input)
+        actual = TestRepo.not_unique_postgres(input)
         assert actual.failure?
         assert actual.failure.is_a?(TestInput)
         assert_equal ["has already been taken"], actual.failure.errors[:foo]

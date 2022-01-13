@@ -32,9 +32,9 @@ module I2w
         list scope.where(user_id: user_id)
       end
 
-      def find_for(user_id:, **kwargs)
+      def find_for(*args, user_id:, **kwargs)
         scope all_for(user_id: user_id) do
-          find(**kwargs)
+          find(*args, **kwargs)
         end
       end
     end
@@ -99,7 +99,7 @@ module I2w
     end
 
     test 'repo #find(by: Hash)' do
-      user = UserRepo.create(input: { email: 'fred@email.com' }).value
+      user = UserRepo.create(email: 'fred@email.com').value
 
       assert_equal user, UserRepo.find(by: { email: 'fred@email.com' }).value
 
@@ -109,7 +109,7 @@ module I2w
     end
 
     test 'repo #find(by: Input)' do
-      user = UserRepo.create(input: { email: 'fred@email.com' }).value
+      user = UserRepo.create(email: 'fred@email.com').value
 
       assert_equal user, UserRepo.find(by: UserInput.new(email: 'fred@email.com')).value
 
@@ -121,35 +121,35 @@ module I2w
     end
 
     test 'repo #find(id:)' do
-      user = UserRepo.create(input: { email: 'fred@email.com' }).value
+      user = UserRepo.create(email: 'fred@email.com').value
 
-      assert_equal user, UserRepo.find(id: user.id).value
+      assert_equal user, UserRepo.find(user.id).value
 
-      actual = UserRepo.find(id: 0)
+      actual = UserRepo.find(0)
       refute actual.success?
       assert actual.failure.is_a?(ActiveRecord::RecordNotFound)
     end
 
     test "repo .with example, #find_for, #all_for" do
-      user = UserRepo.create(input: { email: 'fred@email.com' }).value
-      post = PostRepo.create(input: { user_id: user.id, content: 'My Post' }).value
+      user = UserRepo.create(email: 'fred@email.com').value
+      post = PostRepo.create(user_id: user.id, content: 'My Post').value
 
-      actual = UserRepo.find(id: user.id).value
+      actual = UserRepo.find(user.id).value
       assert_equal UnloadedAttribute.new(User, :posts), actual.posts
 
-      actual = UserRepo.with(:posts).find(id: user.id).value
+      actual = UserRepo.with(:posts).find(user.id).value
       assert_equal [post], actual.posts.to_a
 
-      next_user = UserRepo.create(input: UserInput.new(email: 'jim@email.com')).value
-      next_post = PostRepo.create(input: { user_id: next_user.id, content: 'Jim Post' }).value
+      next_user = UserRepo.create(UserInput.new(email: 'jim@email.com')).value
+      next_post = PostRepo.create(user_id: next_user.id, content: 'Jim Post').value
 
       assert_equal [post, next_post], PostRepo.all.to_a
-      refute PostRepo.find_for(user_id: next_user.id, id: post.id).success?
-      assert PostRepo.find_for(user_id: user.id, id: post.id).success?
+      refute PostRepo.find_for(post.id, user_id: next_user.id).success?
+      assert PostRepo.find_for(post.id, user_id: user.id).success?
       assert_equal [post], PostRepo.all_for(user_id: user.id).to_a
 
-      another_post = PostRepo.create(input: { user_id: next_user.id, content: 'Another Jim Post' }).value
-      next_user = UserRepo.with(:posts).find(id: next_user).value
+      another_post = PostRepo.create(user_id: next_user.id, content: 'Another Jim Post').value
+      next_user = UserRepo.with(:posts).find(next_user).value
       assert_equal [another_post, next_post], next_user.posts.to_a
       assert_equal [next_post, another_post], next_user.posts.reorder(content: :desc).to_a
     end

@@ -38,21 +38,21 @@ module I2w
     end
 
     test 'attributes except: removes attributes before sending to the model' do
-      actual = FooRepo.find(id: 123)
+      actual = FooRepo.find(123)
       assert actual.success?
       assert_equal Foo, actual.value.class
       assert_equal({ three: 3 }, actual.value.to_h)
     end
 
     test 'attributes only: whitelists attributes before sending to the model' do
-      actual = Foo2Repo.find(id: 123)
+      actual = Foo2Repo.find(123)
       assert actual.success?
       assert_equal Foo, actual.value.class
       assert_equal({ three: 3 }, actual.value.to_h)
     end
 
     test 'attributes except: does nothing if the attributes are not in the record' do
-      actual = FooRepo.find(id: 3)
+      actual = FooRepo.find(3)
       assert actual.success?
       assert_equal Foo, actual.value.class
       assert_equal({ three: 3 }, actual.value.to_h)
@@ -60,18 +60,18 @@ module I2w
 
     test 'non ignored attributes in the record raise an error if the attribute is not defined on the model' do
       actual = assert_raises I2w::DataObject::UnknownAttributeError do
-        FooRepo.find(id: 1234)
+        FooRepo.find(1234)
       end
       assert_equal 'Unknown attribute four', actual.message
     end
 
     test 'only: and except: attributes are inherited and can be modified/added to' do
-      actual = FooSubRepo.find(id: 1234)
+      actual = FooSubRepo.find(1234)
       assert actual.success?
       assert_equal Foo, actual.value.class
       assert_equal({ three: 3 }, actual.value.to_h)
 
-      actual = Foo2Repo.find(id: 1234)
+      actual = Foo2Repo.find(1234)
       assert actual.success?
       assert_equal Foo, actual.value.class
       assert_equal({ three: 3 }, actual.value.to_h)

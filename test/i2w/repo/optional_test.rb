@@ -8,7 +8,7 @@ module I2w
       optional :two
       optional :things, scope: :symbol_scope
 
-      def find_with_things(id:)
+      def find_with_things(id)
         model_result do
           record = scope.find(id)
           { **record, things: record.to_hash.values.reject(&:nil?) }
@@ -84,7 +84,7 @@ module I2w
     end
 
     test 'optional_attribute replaces missing attributes with unloaded attributes' do
-      actual = FooRepo.find_with_things(id: 13)
+      actual = FooRepo.find_with_things(13)
       assert actual.success?
       assert_equal Foo, actual.value.class
       assert_equal [:one, :two, :three, :things], actual.value.to_h.keys
@@ -93,7 +93,7 @@ module I2w
     end
 
     test 'optional_attribute does not touch non missing attributes' do
-      actual = FooRepo.find(id: 123)
+      actual = FooRepo.find(123)
       assert actual.success?
       assert_equal Foo, actual.value.class
       assert_equal({ one: 1, two: 2, three: 3}, actual.value.to_hash.reject { _2.blank? })
@@ -101,7 +101,7 @@ module I2w
 
     test 'non optional attributes are still required' do
       actual = assert_raises I2w::DataObject::MissingAttributeError do
-        FooRepo.find(id: 1)
+        FooRepo.find(1)
       end
       assert_equal 'Missing attribute three', actual.message
     end
@@ -110,7 +110,7 @@ module I2w
       repo = FooSubRepo.with(:things)
       assert_equal "I2w::RepoOptionalTest::FooSubRepo.with(:things)", repo.inspect
 
-      actual = repo.find(id: 13)
+      actual = repo.find(13)
 
       assert actual.success?
       assert_equal Foo, actual.value.class
@@ -119,7 +119,7 @@ module I2w
     end
 
     test 'multiple optional attributes' do
-      actual = Foo2Repo.with(:stats).find(id: 123)
+      actual = Foo2Repo.with(:stats).find(123)
       assert actual.success?
       assert_equal Foo2, actual.value.class
       assert_equal({ one: 1, two: 2, three: 3, even_count: 1, odd_count: 2, count: 3 },
@@ -127,7 +127,7 @@ module I2w
     end
 
     test 'specifying a scope' do
-      actual = Foo2Repo.with(:posts).find(id: 123)
+      actual = Foo2Repo.with(:posts).find(123)
       assert actual.success?
       assert_equal [:post1, :post2], actual.value.posts
     end
