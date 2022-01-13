@@ -45,7 +45,7 @@ module I2w
       attribute :user_id
       attribute :content
       attribute :reactions
-      attribute :user
+      attribute :user, default: -> { UserRepo.find(_1.user_id).value }
     end
 
     class ReactionRepo < Repo
@@ -165,6 +165,21 @@ module I2w
       assert_equal [post_c, post_b, post_a], PostRepo.all.to_a
       assert_equal [post_a, post_b, post_c], PostRepo.all.order(:content).to_a
       assert_equal [post_a, post_b, post_c], UserRepo.with(:posts).find(user.id).value.posts.to_a
+    end
+
+    test "default attribute can be loaded by Repo, or not (load via Repo to void n+1 queries)" do
+      user = UserRepo.create(email: 'fred@email.com').value
+      post = PostRepo.create(user_id: user.id, content: 'Post A').value
+
+      # load via default attribute
+      actual = PostRepo.find(post.id).value
+      assert_equal user, actual.user
+      assert_equal UnloadedAttribute.new(User, :posts), actual.user.posts
+
+      # load via Repo, loaded with :posts to show where it was loaded from
+      actual = PostRepo.with(user: :posts).find(post.id).value
+      assert_equal user, actual.user
+      assert_equal [post], actual.user.posts.to_a
     end
 
     test 'Input with record_dependency infers types from the record' do
