@@ -73,7 +73,7 @@ module I2w
 
       attr_reader :config, :exceptions
 
-      delegate :attributes, to: :config
+      delegate :attributes, :default_order, to: :config
 
       def inherited(subclass)
         subclass.instance_variable_set :@config, config.dup

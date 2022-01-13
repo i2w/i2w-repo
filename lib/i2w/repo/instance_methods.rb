@@ -8,12 +8,17 @@ module I2w
         @with           = config.assert_optional!(*with)
         @record_to_hash = config.record_to_hash(model_class, with: @with)
         @scope          = config.scope(record_class, with: @with)
+        @default_order  = config.default_order
         freeze
       end
 
-      def model(record) = model_class.new(**record_to_hash.call(record))
+      def model(record)
+        model_class.new(**record_to_hash.call(record))
+      end
 
-      def list(source) = list_class.new(source, model_class: model_class, record_to_hash: record_to_hash)
+      def list(source)
+        list_class.new(source, model_class: model_class, record_to_hash: record_to_hash, default_order: default_order)
+      end
 
       alias models list
 
@@ -76,7 +81,7 @@ module I2w
 
       private
 
-      attr_reader :record_to_hash
+      attr_reader :record_to_hash, :default_order
 
       # create a temporary Repo instance with the new_scope to execute the block in
       def new_scope(new_scope, &block)

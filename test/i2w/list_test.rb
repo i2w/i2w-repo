@@ -135,6 +135,8 @@ module I2w
       method = List::OrderArray.method(:parse_order)
       assert_equal({a: nil, b: :desc}, method.call('a, b DESC'))
       assert_equal({a: :desc, b: nil, c: :desc, d: nil, e: :desc}, method.call('a DESC ', 'b,c desc', :d, e: :desc))
+      assert_equal({a: nil, b: :desc}, method.call(*['a', { b: :desc }]))
+      assert_equal({}, method.call(nil))
     end
   end
 end

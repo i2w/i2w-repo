@@ -13,6 +13,7 @@ module I2w
         @always_attributes = []
         @optional_attributes = {}
         @optional_scopes = {}
+        @default_order = nil
       end
 
       def initialize_dup(src)
@@ -21,9 +22,15 @@ module I2w
         @always_attributes   = src.always_attributes.dup
         @optional_attributes = src.optional_attributes.dup
         @optional_scopes     = src.optional_scopes.dup
+        @default_order       = src.default_order.dup
       end
 
       attr_reader :only_attributes, :except_attributes, :always_attributes, :optional_attributes, :optional_scopes
+
+      def default_order(*val)
+        @default_order = val if val.any?
+        @default_order
+      end
 
       def attributes(only: NoArg, except: NoArg)
         @only_attributes = only unless only == NoArg

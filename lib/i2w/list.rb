@@ -78,7 +78,7 @@ module I2w
       class_eval "def #{meth}(...) = new(source.#{meth}(...), default_order: nil)", __FILE__, __LINE__
     end
 
-    def default_order(...) = has_order? ? self : new(default_order: OrderArray.parse_order(...))
+    def default_order(*args) = has_order? ? self : new(default_order: args)
 
     private
 
@@ -86,7 +86,7 @@ module I2w
 
     def has_order? = @source.order_values.any?
 
-    def resolved = @default_order ? @source.order(**@default_order) : @source
+    def resolved = @default_order ? @source.order(*@default_order) : @source
 
     def model(record) = @model_class.new(**@record_to_hash.call(record))
 
@@ -100,24 +100,27 @@ module I2w
     end
 
     class ArraySource < List
-      class RecordNotFound < RuntimeError
+      class RecordNotFound < ActiveRecord::RecordNotFound
         def initialize(message = 'No record exists') = super
       end
 
       def self.new(...) = original_new(...)
 
-      def initialize(source, limit: nil, offset: nil, order: nil, **kwargs)
+      def initialize(source, limit: nil, offset: nil, order: nil, default_order: nil, **kwargs)
         @limit = limit
         @offset = offset
         @order = order
-        super(source, **kwargs)
+
+        default_order = OrderArray.parse_order(*default_order)
+
+        super(source, default_order: default_order, **kwargs)
       end
 
       delegate :count, to: :resolved
 
       def pluck(*cols) = resolved.map { _1.to_hash.yield_self { |r| cols.one? ? r[cols[0]] : r.values_at(*cols) } }
 
-      def first! = Result.wrap { first or raise RecordNotFound }
+      def first! = Result.wrap { first or raise ActiveRecord::RecordNotFound }
 
       def last! = Result.wrap { last or raise RecordNotFound }
 
@@ -162,7 +165,10 @@ module I2w
       end
 
       def self.parse_order(*args, **opts)
+        args.compact!
         return opts if args.empty?
+
+        opts.merge!(args.pop) if args.last.is_a?(Hash)
 
         args.map { _1.to_s.split(',') }.flatten.to_h do
           [_1[/(\w+)/,1].to_sym, _1 =~ /\w +desc\b/i && :desc]
