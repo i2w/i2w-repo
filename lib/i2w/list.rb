@@ -65,7 +65,7 @@ module I2w
 
     # these methods are finders, and return a Result
     %i[first! last!].each do |meth|
-      class_eval "def #{meth} = Result.wrap { model(resolved.#{meth}) }", __FILE__, __LINE__
+      class_eval "def #{meth} = Result.to_result { model(resolved.#{meth}) }", __FILE__, __LINE__
     end
 
     # these methods return a new List object, with a new source with the method applied
@@ -120,9 +120,9 @@ module I2w
 
       def pluck(*cols) = resolved.map { _1.to_hash.yield_self { |r| cols.one? ? r[cols[0]] : r.values_at(*cols) } }
 
-      def first! = Result.wrap { first or raise ActiveRecord::RecordNotFound }
+      def first! = Result.to_result { first or raise RecordNotFound }
 
-      def last! = Result.wrap { last or raise RecordNotFound }
+      def last! = Result.to_result { last or raise RecordNotFound }
 
       def order(...) = new(order: { **order_hash, **OrderArray.parse_order(...) }, default_order: nil)
 

@@ -5,10 +5,11 @@ module I2w
     module InstanceMethods
       def initialize(with: nil, **kwargs)
         super(**kwargs)
-        @with           = config.assert_optional!(*with)
-        @record_to_hash = config.record_to_hash(model_class, with: @with)
-        @scope          = config.scope(record_class, with: @with)
-        @default_order  = config.default_order
+        @with              = config.assert_optional!(*with)
+        @record_to_hash    = config.record_to_hash(model_class, with: @with)
+        @scope             = config.scope(record_class, with: @with)
+        @default_order     = config.default_order
+        @rescue_as_failure = config.rescue_as_failure
         freeze
       end
 
@@ -64,14 +65,16 @@ module I2w
       end
 
       # turns a successful record_result into a model
-      def model_result(...) = record_result(...).and_then { model _1 }
+      def model_result(...) = to_result(...).and_then { model _1 }
 
       # run the block, translating any Exceptions into failures, if input (first argument) is passed, and is
       # an I2w::Input, any errors will be added to that, and that is returned as the failure
       #
       # pass transaction: true to run the block inside a transaction
-      def record_result(input = nil, transaction: false, &block)
-        result = transaction ? self.transaction { exceptions.wrap(&block) } : exceptions.wrap(&block)
+      #
+      # Returns Result.success or Result.failure
+      def to_result(input = nil, transaction: false, &block)
+        result = transaction ? self.transaction { rescue_as_failure.call(&block) } : rescue_as_failure.call(&block)
 
         return result if result.success? || !input.respond_to?(:valid?)
 
@@ -81,7 +84,7 @@ module I2w
 
       private
 
-      attr_reader :record_to_hash, :default_order
+      attr_reader :record_to_hash, :default_order, :rescue_as_failure
 
       # create a temporary Repo instance with the new_scope to execute the block in
       def new_scope(new_scope, &block)
@@ -97,8 +100,6 @@ module I2w
       end
 
       def config = self.class.send(:config)
-
-      def exceptions = self.class.send(:exceptions)
     end
   end
 end
