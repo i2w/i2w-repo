@@ -55,8 +55,8 @@ module I2w
       #       list scope.where(user_id: user_id)
       #     end
       #
-      #     def find_for_user(user_id, **kwargs)
-      #       scope(all_for_user(user_id)) { find(**kwargs) }
+      #     def find_for_user(*args, user_id, **kwargs)
+      #       scope(all_for_user(user_id)) { find(*args, **kwargs) }
       #     end
       def scope(new_scope = NoArg, &block)
         return new_scope(new_scope, &block) if new_scope != NoArg && block
@@ -73,18 +73,18 @@ module I2w
       # pass transaction: true to run the block inside a transaction
       #
       # Returns Result.success or Result.failure
-      def to_result(input: nil, transaction: false, &block)
-        result = transaction ? self.transaction { rescue_as_failure.call(&block) } : rescue_as_failure.call(&block)
+      def to_result(obj = nil, input: nil, transaction: false, &block)
+        obj = transaction ? self.transaction { rescue_as_failure(&block) } : rescue_as_failure(&block) if block
+        obj = Result.to_result(obj)
 
-        return result if result.success? || !input.respond_to?(:valid?)
+        return obj if obj.success? || !input.respond_to?(:valid?)
 
-        input.errors = result.errors
-        Result.failure(input)
+        Result.failure(input.tap { _1.errors = obj.errors })
       end
 
       private
 
-      attr_reader :record_to_hash, :default_order, :rescue_as_failure
+      attr_reader :record_to_hash, :default_order
 
       # create a temporary Repo instance with the new_scope to execute the block in
       def new_scope(new_scope, &block)
@@ -100,6 +100,8 @@ module I2w
       end
 
       def config = self.class.send(:config)
+
+      def rescue_as_failure(&block) = config.rescue_as_failure.call(&block)
     end
   end
 end

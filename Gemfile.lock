@@ -8,7 +8,7 @@ GIT
 
 GIT
   remote: https://github.com/i2w/i2w-result.git
-  revision: 0633ffbc1fc4bbff38c805e02ebab707d24ca7d7
+  revision: f1205df91ee3d4707fa8c339bf8c7389dfc7571f
   branch: main
   specs:
     i2w-result (0.1.0)
