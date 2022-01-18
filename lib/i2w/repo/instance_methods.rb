@@ -67,13 +67,13 @@ module I2w
       # turns a successful record_result into a model
       def model_result(...) = to_result(...).and_then { model _1 }
 
-      # run the block, translating any Exceptions into failures, if input (first argument) is passed, and is
+      # run the block, translating any Exceptions into failures, if input: kwarg is passed, and is
       # an I2w::Input, any errors will be added to that, and that is returned as the failure
       #
       # pass transaction: true to run the block inside a transaction
       #
       # Returns Result.success or Result.failure
-      def to_result(input = nil, transaction: false, &block)
+      def to_result(input: nil, transaction: false, &block)
         result = transaction ? self.transaction { rescue_as_failure.call(&block) } : rescue_as_failure.call(&block)
 
         return result if result.success? || !input.respond_to?(:valid?)

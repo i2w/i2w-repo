@@ -15,23 +15,23 @@ module I2w
         end
 
         def not_found(input = nil)
-          model_result(input) { raise ActiveRecord::RecordNotFound, 'could not find it' }
+          model_result(input: input) { raise ActiveRecord::RecordNotFound, 'could not find it' }
         end
 
         def not_null_postgres(input = nil)
-          model_result(input) { raise ActiveRecord::NotNullViolation, 'null value in column "foo" of relation "bar" violates' }
+          model_result(input: input) { raise ActiveRecord::NotNullViolation, 'null value in column "foo" of relation "bar" violates' }
         end
 
         def not_null_other(input = nil)
-          model_result(input) { raise ActiveRecord::NotNullViolation, 'oops "foo"' }
+          model_result(input: input) { raise ActiveRecord::NotNullViolation, 'oops "foo"' }
         end
 
         def not_unique_postgres(input = nil)
-          model_result(input) { raise ActiveRecord::RecordNotUnique, 'Key (foo)=(bar) already exists' }
+          model_result(input: input) { raise ActiveRecord::RecordNotUnique, 'Key (foo)=(bar) already exists' }
         end
 
         def not_unique_other(input = nil)
-          model_result(input) { raise ActiveRecord::RecordNotUnique, 'oops "foo"' }
+          model_result(input: input) { raise ActiveRecord::RecordNotUnique, 'oops "foo"' }
         end
       end
 
