@@ -39,13 +39,13 @@ module I2w
     # create a record with the input <attrs>
     # returns Success(model), Failure(input) if Input object given, or Failure(error)
     def create(input)
-      model_result(input) { record_class.create(**input) }
+      model_result(input: input) { record_class.create(**input) }
     end
 
     # update the record found with pkey, with input <attrs>
     # returns Success(model), Failure(input) if Input object given, or Failure(error)
     def update(pkey, input)
-      model_result input, transaction: true do
+      model_result input: input, transaction: true do
         scope.find(pkey).tap do |record|
           record.update!(**input)
         end
@@ -55,7 +55,7 @@ module I2w
     # find or initialize record by: <attrs>, updating with input: <attrs>
     # returns Success(model), Failure(input) if Input object given, or Failure(error)
     def upsert(input = nil, by:)
-      model_result input, transaction: true do
+      model_result input: input, transaction: true do
         record_class.find_or_initialize_by(**by).tap do |record|
           record.update!(**input) if input
         end

@@ -103,6 +103,16 @@ module I2w
         assert_equal [zed, non, abe], q.order(created_at: :desc).order('email').reverse_order.to_a
       end
 
+      test "#{desc} #default_order provides order if none specified" do
+        q = list(&source).default_order(email: :desc)
+
+        assert_equal [zed, non, abe], q.to_a
+        assert_equal [abe, zed, non], q.order(:name).to_a
+
+        # default_order after order is ignored
+        assert_equal [abe, zed, non], q.order(:name).default_order(name: :desc).to_a
+      end
+
       test "#{desc} #offset and #limit" do
         q = list(&source).order(:id)
 
@@ -125,6 +135,8 @@ module I2w
       method = List::OrderArray.method(:parse_order)
       assert_equal({a: nil, b: :desc}, method.call('a, b DESC'))
       assert_equal({a: :desc, b: nil, c: :desc, d: nil, e: :desc}, method.call('a DESC ', 'b,c desc', :d, e: :desc))
+      assert_equal({a: nil, b: :desc}, method.call(*['a', { b: :desc }]))
+      assert_equal({}, method.call(nil))
     end
   end
 end

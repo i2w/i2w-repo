@@ -5,15 +5,21 @@ module I2w
     module InstanceMethods
       def initialize(with: nil, **kwargs)
         super(**kwargs)
-        @with           = config.assert_optional!(*with)
-        @record_to_hash = config.record_to_hash(model_class, with: @with)
-        @scope          = config.scope(record_class, with: @with)
+        @with              = config.assert_optional!(*with)
+        @record_to_hash    = config.record_to_hash(model_class, with: @with)
+        @scope             = config.scope(record_class, with: @with)
+        @default_order     = config.default_order
+        @rescue_as_failure = config.rescue_as_failure
         freeze
       end
 
-      def model(record) = model_class.new(**record_to_hash.call(record))
+      def model(record)
+        model_class.new(**record_to_hash.call(record))
+      end
 
-      def list(source) = list_class.new(source, model_class: model_class, record_to_hash: record_to_hash)
+      def list(source)
+        list_class.new(source, model_class: model_class, record_to_hash: record_to_hash, default_order: default_order)
+      end
 
       alias models list
 
@@ -49,8 +55,8 @@ module I2w
       #       list scope.where(user_id: user_id)
       #     end
       #
-      #     def find_for_user(user_id, **kwargs)
-      #       scope(all_for_user(user_id)) { find(**kwargs) }
+      #     def find_for_user(*args, user_id, **kwargs)
+      #       scope(all_for_user(user_id)) { find(*args, **kwargs) }
       #     end
       def scope(new_scope = NoArg, &block)
         return new_scope(new_scope, &block) if new_scope != NoArg && block
@@ -59,24 +65,26 @@ module I2w
       end
 
       # turns a successful record_result into a model
-      def model_result(...) = record_result(...).and_then { model _1 }
+      def model_result(...) = to_result(...).and_then { model _1 }
 
-      # run the block, translating any Exceptions into failures, if input (first argument) is passed, and is
+      # run the block, translating any Exceptions into failures, if input: kwarg is passed, and is
       # an I2w::Input, any errors will be added to that, and that is returned as the failure
       #
       # pass transaction: true to run the block inside a transaction
-      def record_result(input = nil, transaction: false, &block)
-        result = transaction ? self.transaction { exceptions.wrap(&block) } : exceptions.wrap(&block)
+      #
+      # Returns Result.success or Result.failure
+      def to_result(obj = nil, input: nil, transaction: false, &block)
+        obj = transaction ? self.transaction { rescue_as_failure(&block) } : rescue_as_failure(&block) if block
+        obj = Result.to_result(obj)
 
-        return result if result.success? || !input.respond_to?(:valid?)
+        return obj if obj.success? || !input.respond_to?(:valid?)
 
-        input.errors = result.errors
-        Result.failure(input)
+        Result.failure(input.tap { _1.errors = obj.errors })
       end
 
       private
 
-      attr_reader :record_to_hash
+      attr_reader :record_to_hash, :default_order
 
       # create a temporary Repo instance with the new_scope to execute the block in
       def new_scope(new_scope, &block)
@@ -93,7 +101,7 @@ module I2w
 
       def config = self.class.send(:config)
 
-      def exceptions = self.class.send(:exceptions)
+      def rescue_as_failure(&block) = config.rescue_as_failure.call(&block)
     end
   end
 end

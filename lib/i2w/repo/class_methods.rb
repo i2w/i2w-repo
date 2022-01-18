@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
+require 'i2w/rescue_as_failure'
+
 require_relative './config'
-require_relative './exceptions'
 
 module I2w
   class Repo
@@ -11,7 +12,6 @@ module I2w
       def self.extended(repo)
         repo.singleton_class.send :private, :new # calling new on Repo is forbidden
         repo.instance_variable_set :@config, Config.new
-        repo.instance_variable_set :@exceptions, Exceptions.new
       end
 
       delegate :transaction, :rollback!, :model, :models, :list, to: :instance
@@ -22,8 +22,6 @@ module I2w
 
       # repository dependencies must have public instance readers
       def dependency(*args, public: nil, class_only: nil) = super(*args, public: true, class_only: false)
-
-      def exception(exception_class, handler = nil, &block) = exceptions.add(exception_class, block || handler)
 
       # specify an optional attribute or attributes to load
       def optional(*args, scope: NoArg, **kwargs)
@@ -71,13 +69,12 @@ module I2w
 
       memoize def instance = new
 
-      attr_reader :config, :exceptions
+      attr_reader :config
 
-      delegate :attributes, to: :config
+      delegate :attributes, :default_order, :exception, to: :config
 
       def inherited(subclass)
         subclass.instance_variable_set :@config, config.dup
-        subclass.instance_variable_set :@exceptions, exceptions.dup
         super
       end
 

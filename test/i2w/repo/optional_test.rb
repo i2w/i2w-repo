@@ -5,6 +5,7 @@ require 'test_helper'
 module I2w
   class RepoOptionalTest < ActiveSupport::TestCase
     class FooRepo < Repo
+      optional :one
       optional :two
       optional :things, scope: :symbol_scope
 
@@ -34,7 +35,7 @@ module I2w
     end
 
     class Foo < Model
-      attribute :one
+      attribute :one, default: -> { 'Default 1' }
       attribute :two
       attribute :three
       attribute :things
@@ -65,9 +66,10 @@ module I2w
 
       def self.find(id)
         case id
-        when 1 then new(one: 1)
-        when 13 then new(one: 1, three: 3)
+        when 1   then new(one: 1)
+        when 13  then new(one: 1, three: 3)
         when 123 then new(one: 1, two: 2, three: 3)
+        when 23  then new(two: 2, three: 3)
         end
       end
 
@@ -93,10 +95,15 @@ module I2w
     end
 
     test 'optional_attribute does not touch non missing attributes' do
-      actual = FooRepo.find(123)
-      assert actual.success?
-      assert_equal Foo, actual.value.class
-      assert_equal({ one: 1, two: 2, three: 3}, actual.value.to_hash.reject { _2.blank? })
+      actual = FooRepo.find(123).value
+      assert_equal Foo, actual.class
+      assert_equal({ one: 1, two: 2, three: 3}, actual.to_hash.reject { _2.blank? })
+    end
+
+    test 'unloaded attribute triggers default' do
+      actual = FooRepo.find(23).value
+      assert_equal Foo, actual.class
+      assert_equal({ one: 'Default 1', two: 2, three: 3, things: UnloadedAttribute.new(Foo, :things)}, actual.to_hash)
     end
 
     test 'non optional attributes are still required' do

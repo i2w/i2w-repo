@@ -39,10 +39,11 @@ module I2w
       end
     end
 
-    def initialize(source, model_class:, record_to_hash: -> { _1.to_hash })
+    def initialize(source, model_class:, record_to_hash: -> { _1.to_hash }, default_order: nil)
       @source = source
       @model_class = model_class
       @record_to_hash = record_to_hash
+      @default_order = default_order
 
       freeze
     end
@@ -64,19 +65,28 @@ module I2w
 
     # these methods are finders, and return a Result
     %i[first! last!].each do |meth|
-      class_eval "def #{meth} = Result.wrap { model(resolved.#{meth}) }", __FILE__, __LINE__
+      class_eval "def #{meth} = Result.to_result { model(resolved.#{meth}) }", __FILE__, __LINE__
     end
 
-    # these methods return a new Models object, with a new source with the method applied
-    %i[order reorder reverse_order limit offset].each do |meth|
+    # these methods return a new List object, with a new source with the method applied
+    %i[limit offset].each do |meth|
       class_eval "def #{meth}(...) = new(source.#{meth}(...))", __FILE__, __LINE__
     end
+
+    # these methods return a new ordered List object, which removes any default_order
+    %i[order reorder reverse_order].each do |meth|
+      class_eval "def #{meth}(...) = new(source.#{meth}(...), default_order: nil)", __FILE__, __LINE__
+    end
+
+    def default_order(*args) = has_order? ? self : new(default_order: args)
 
     private
 
     attr_reader :source
 
-    def resolved = @source
+    def has_order? = @source.order_values.any?
+
+    def resolved = @default_order ? @source.order(*@default_order) : @source
 
     def model(record) = @model_class.new(**@record_to_hash.call(record))
 
@@ -85,37 +95,40 @@ module I2w
       return model(arg) if arg
     end
 
-    def new(source = @source, model_class: @model_class, record_to_hash: @record_to_hash, **kwargs)
-      self.class.new(source, model_class: model_class, record_to_hash: record_to_hash, **kwargs)
+    def new(source = @source, model_class: @model_class, record_to_hash: @record_to_hash, default_order: @default_order, **kwargs)
+      self.class.new(source, model_class: model_class, record_to_hash: record_to_hash, default_order: default_order, **kwargs)
     end
 
     class ArraySource < List
-      class RecordNotFound < RuntimeError
+      class RecordNotFound < ActiveRecord::RecordNotFound
         def initialize(message = 'No record exists') = super
       end
 
       def self.new(...) = original_new(...)
 
-      def initialize(source, limit: nil, offset: nil, order: nil, **kwargs)
+      def initialize(source, limit: nil, offset: nil, order: nil, default_order: nil, **kwargs)
         @limit = limit
         @offset = offset
         @order = order
-        super(source, **kwargs)
+
+        default_order = OrderArray.parse_order(*default_order)
+
+        super(source, default_order: default_order, **kwargs)
       end
 
       delegate :count, to: :resolved
 
       def pluck(*cols) = resolved.map { _1.to_hash.yield_self { |r| cols.one? ? r[cols[0]] : r.values_at(*cols) } }
 
-      def first! = Result.wrap { first or raise RecordNotFound }
+      def first! = Result.to_result { first or raise RecordNotFound }
 
-      def last! = Result.wrap { last or raise RecordNotFound }
+      def last! = Result.to_result { last or raise RecordNotFound }
 
-      def order(...) = new(order: { **order_hash, **OrderArray.parse_order(...) })
+      def order(...) = new(order: { **order_hash, **OrderArray.parse_order(...) }, default_order: nil)
 
-      def reorder(...) = new(order: OrderArray.parse_order(...))
+      def reorder(...) = new(order: OrderArray.parse_order(...), default_order: nil)
 
-      def reverse_order = new(order: OrderArray.reverse_order(**order_hash))
+      def reverse_order = new(order: OrderArray.reverse_order(**order_hash), default_order: nil)
 
       def limit(limit) = new(limit: limit)
 
@@ -123,8 +136,11 @@ module I2w
 
       private
 
+      def has_order? = @order
+
       def resolved
-        source = OrderArray.call(@source, **order_hash)
+        order = @order || @default_order || {}
+        source = OrderArray.call(@source, **order)
         source = source[@offset..] if @offset
         source = source[0, @limit] if @limit
         source
@@ -149,7 +165,10 @@ module I2w
       end
 
       def self.parse_order(*args, **opts)
+        args.compact!
         return opts if args.empty?
+
+        opts.merge!(args.pop) if args.last.is_a?(Hash)
 
         args.map { _1.to_s.split(',') }.flatten.to_h do
           [_1[/(\w+)/,1].to_sym, _1 =~ /\w +desc\b/i && :desc]

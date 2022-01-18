@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'i2w/rescue_as_failure'
 require_relative '../record/to_hash'
 require_relative '../unloaded_attribute'
 
@@ -13,6 +14,8 @@ module I2w
         @always_attributes = []
         @optional_attributes = {}
         @optional_scopes = {}
+        @default_order = nil
+        @rescue_as_failure = RescueAsFailure.new
       end
 
       def initialize_dup(src)
@@ -21,9 +24,23 @@ module I2w
         @always_attributes   = src.always_attributes.dup
         @optional_attributes = src.optional_attributes.dup
         @optional_scopes     = src.optional_scopes.dup
+        @default_order       = src.default_order.dup
+        @rescue_as_failure   = src.rescue_as_failure.dup
       end
 
-      attr_reader :only_attributes, :except_attributes, :always_attributes, :optional_attributes, :optional_scopes
+      attr_reader :only_attributes,
+                  :except_attributes,
+                  :always_attributes,
+                  :optional_attributes,
+                  :optional_scopes,
+                  :rescue_as_failure
+
+      def exception(...) = rescue_as_failure.add(...)
+
+      def default_order(*val)
+        @default_order = val if val.any?
+        @default_order
+      end
 
       def attributes(only: NoArg, except: NoArg)
         @only_attributes = only unless only == NoArg
