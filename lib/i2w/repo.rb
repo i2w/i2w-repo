@@ -54,7 +54,7 @@ module I2w
 
     # find or initialize record by: <attrs>, updating with input: <attrs>
     # returns Success(model), Failure(input) if Input object given, or Failure(error)
-    def upsert(input = nil, by:)
+    def upsert(input_arg = nil, input: input_arg, by:)
       model_result input: input, transaction: true do
         record_class.find_or_initialize_by(**by).tap do |record|
           record.update!(**input) if input
