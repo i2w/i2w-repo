@@ -16,8 +16,10 @@ require_relative 'repo/instance_methods'
 module I2w
   # Repository class. Subclass this to define a repository.  Send methods directly to the repository
   class Repo
-    NoArg = I2w::NoArg
+    # subclasses should be able to access these constants without I2w:: prefix
+    NoArg  = I2w::NoArg
     Result = I2w::Result
+    List   = I2w::List
 
     extend Dependencies
     extend ClassMethods

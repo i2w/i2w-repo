@@ -72,7 +72,9 @@ module I2w
       def assert_optional!(*with)
         with_keys, _ = keys_and_options(with)
         unknown      = with_keys - optional_attributes.keys
-        raise ArgumentError, "#{unknown.join(', ')} not in #{optional_attributes.keys.join(', ')})" if unknown.any?
+        if unknown.any?
+          raise ArgumentError, "unknown option(s): #{unknown.join(', ')} (not in: #{optional_attributes.keys.inspect}"
+        end
 
         with
       end

@@ -42,7 +42,7 @@ module I2w
     def initialize(source, model_class:, record_to_hash: -> { _1.to_hash }, default_order: nil)
       @source = source
       @model_class = model_class
-      @record_to_hash = record_to_hash
+      @record_to_hash = record_to_hash.is_a?(Hash) ? Record::ToHash.new(**record_to_hash) : record_to_hash
       @default_order = default_order
 
       freeze
