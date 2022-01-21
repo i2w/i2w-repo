@@ -73,7 +73,7 @@ module I2w
         with_keys, _ = keys_and_options(with)
         unknown      = with_keys - optional_attributes.keys
         if unknown.any?
-          raise ArgumentError, "unknown option(s): #{unknown.join(', ')} (not in: #{optional_attributes.keys.inspect}"
+          raise ArgumentError, "unknown option(s): #{unknown.join(', ')} (not in: #{optional_attributes.keys.inspect})"
         end
 
         with
