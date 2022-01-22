@@ -55,8 +55,8 @@ module I2w
     # count only counts records in List, provide your own list class for enhanced behaviour
     def count = source.count(:all)
 
-    # these methods return basic types
-    delegate :pluck, :size, :length, to: :resolved
+    # these methods return basic types and don't apply default_order
+    delegate :pluck, :size, :length, :exists?, to: :source
 
     # these methods return nil, object, array of objects
     %i[first last []].each do |meth|
@@ -133,6 +133,10 @@ module I2w
       def limit(limit) = new(limit: limit)
 
       def offset(offset) = new(offset: offset)
+
+      def exists? = resolved.size > 0
+
+      delegate :size, :length, to: :resolved
 
       private
 

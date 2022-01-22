@@ -38,6 +38,11 @@ module I2w
         assert_equal 3, list(&source).length
       end
 
+      test "#{desc} #exists?" do
+        assert list(&source).exists?
+        refute list(&source).limit(0).exists?
+      end
+
       test "#{desc} #[]" do
         q = list(&source).order(:id)
         assert_equal non, q[1]
@@ -118,6 +123,8 @@ module I2w
 
         assert_equal [abe, non], q.limit(2).to_a
         assert_equal 2, q.limit(2).count
+        assert_equal 2, q.limit(2).length
+        assert_equal 2, q.limit(2).size
         assert_equal [non, zed], q.offset(1).to_a
         assert_equal 2, q.offset(1).count
         assert_equal [non, zed], q.offset(1).limit(2).to_a
@@ -130,6 +137,14 @@ module I2w
     test_query_behaviour('source is activerecord scope') { UserRecord.all }
 
     test_query_behaviour('source is array of records') { [@abe_record, @non_record, @zed_record] }
+
+    test 'activrecord scope with join #default_order and #pluck' do
+      PostRecord.create!(user_id: abe.id, content: "Abe Post")
+      scope = UserRecord.distinct.joins(:posts).all
+      actual = List.new(scope, model_class: User).default_order(:email)
+
+      assert_equal [abe.id], actual.pluck(:id)
+    end
 
     test 'OrderArray.parse_order' do
       method = List::OrderArray.method(:parse_order)
