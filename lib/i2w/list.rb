@@ -52,6 +52,8 @@ module I2w
 
     def each = block_given? ? resolved.each { yield model _1 } : to_enum(:each)
 
+    alias to_ary to_a
+
     # count only counts records in List, provide your own list class for enhanced behaviour
     def count = source.count(:all)
 

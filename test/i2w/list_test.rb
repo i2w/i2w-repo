@@ -26,6 +26,12 @@ module I2w
 
     # source is either an array of users, or an arel scope for the same
     def self.test_query_behaviour(desc, &source)
+      test "#{desc} #to_ary" do
+        a, *rest = list(&source).order(:id)
+        assert_equal abe, a
+        assert_equal [non, zed], rest
+      end
+
       test "#{desc} #count" do
         assert_equal 3, list(&source).count
       end
