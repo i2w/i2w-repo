@@ -54,6 +54,8 @@ module I2w
       attributes_hash
     end
 
+    def read_attribute_for_validation(attr) = attributes_hash[attr]
+
     alias to_hash attributes
     alias to_h attributes
 

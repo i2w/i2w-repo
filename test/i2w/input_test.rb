@@ -52,6 +52,16 @@ module I2w
       assert_equal({ foo: [{ error: :blank }] }, input.errors.details)
     end
 
+    test '#errors with i18n' do
+      actual = FooInput.new foo: "FOO"
+      actual.errors.add(:foo, :too_short, count: 5)
+      actual.errors.add(:faz, :blank)
+      actual.errors.add(:zoo, :taken)
+
+      assert_equal ["Foo is too short (minimum is 5 characters)", "Faz can't be blank", "Zoo has already been taken"],
+                   actual.errors.full_messages
+    end
+
     test 'how to patch an input' do
       existing = FooInput.new(foo: 'bar', faz: 'baz')
 
