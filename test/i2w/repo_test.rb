@@ -187,5 +187,75 @@ module I2w
       assert_equal 12, actual.likes
       assert_equal true, actual.pinned
     end
+
+    test 'Repo.transactional rollbacks transactions if the result is a failure, and returns the failure' do
+      actual = Repo.transaction { :hi }
+      assert actual.success?
+      assert_equal :hi, actual.value
+
+      actual = Repo.transaction do
+        UserRepo.create(email: 'abe@email.com').and_tap do
+          assert_equal 1, UserRepo.all.count
+        end.and_then do |user|
+          Result.failure(user) # for some business related reason
+        end
+      end
+
+      assert actual.failure?
+      assert_instance_of User, actual.failure
+      assert_equal 'abe@email.com', actual.failure.email
+      assert_equal 0, UserRepo.all.count
+    end
+
+    test 'Repo#to_result transaction: true' do
+      Repo.to_result transaction: true do
+        user = UserRecord.create!(email: 'abe@email.com')
+        assert_equal 1, UserRecord.count
+        PostRecord.create!(user_id: user.id, content: 'one')
+        assert_equal 1, PostRecord.count
+        PostRecord.create!
+        raise 'never reached'
+      end
+
+      assert_equal 0, UserRecord.count
+      assert_equal 0, PostRecord.count
+    end
+
+    test 'Repo.transaction test' do
+      begin
+        Repo.transaction do
+          user = UserRecord.create!(email: 'abe@email.com')
+          assert_equal 1, UserRecord.count
+          PostRecord.create!(user_id: user.id, content: 'one')
+          assert_equal 1, PostRecord.count
+          PostRecord.create!
+          raise 'never reached'
+        end
+      rescue ActiveRecord::NotNullViolation
+      end
+
+      assert_equal 0, UserRecord.count
+      assert_equal 0, PostRecord.count
+    end
+
+    test 'nested Repo.transaction test' do
+      begin
+        Repo.transaction do
+          user = UserRecord.create!(email: 'abe@email.com')
+          assert_equal 1, UserRecord.count
+
+          Repo.transaction do
+            PostRecord.create!(user_id: user.id, content: 'one')
+            assert_equal 1, PostRecord.count
+            PostRecord.create!
+            raise 'never reached'
+          end
+        end
+      rescue ActiveRecord::NotNullViolation
+      end
+
+      assert_equal 0, UserRecord.count
+      assert_equal 0, PostRecord.count
+    end
   end
 end

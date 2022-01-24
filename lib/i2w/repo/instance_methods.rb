@@ -23,13 +23,44 @@ module I2w
 
       alias models list
 
+      # Automatically rollback the transaction if the block result is a failure
+      #
+      # Has the same behaviour as ActiveRecord transactions, but we expect transactions may be nested,
+      # so we set sane defaults for this.
+      # @see https://makandracards.com/makandra/42885-nested-activerecord-transaction-pitfalls
+      #
+      # Returns Result.success or Result.failure
       def transaction(&block)
-        # we expect transactions to be nested, so we set sane defaults for this
-        # @see https://makandracards.com/makandra/42885-nested-activerecord-transaction-pitfalls
-        ActiveRecord::Base.transaction(joinable: false, requires_new: true, &block)
+        result = nil
+        ActiveRecord::Base.transaction(joinable: false, requires_new: true) do
+          result = Result.to_result(&block)
+          raise ActiveRecord::Rollback
+        end
+        result
       end
 
-      def rollback! = raise(ActiveRecord::Rollback)
+      # turns a successful record_result into a model
+      def model_result(...) = to_result(...).and_then { model _1 }
+
+      # run the block, translating any Exceptions into failures, if input: kwarg is passed, and has an errors
+      # object, any errors will be added to that, and that is returned as the failure
+      #
+      # pass transaction: true to run the block inside a transaction
+      #
+      # Returns Result.success or Result.failure
+      def to_result(input: nil, transaction: false, &block)
+        result = if transaction
+                   self.transaction { rescue_as_failure(&block) }
+                 else
+                   rescue_as_failure(&block)
+                 end
+
+        return result if result.success? || !input.respond_to?(:errors)
+
+        input.errors = result.errors
+
+        Result.failure input
+      end
 
       def to_s = "#{self.class.name}#{@with.any? ? ".with(#{@with.map(&:inspect).join(', ')})" : ''}"
 
@@ -62,24 +93,6 @@ module I2w
         return new_scope(new_scope, &block) if new_scope != NoArg && block
 
         @scope
-      end
-
-      # turns a successful record_result into a model
-      def model_result(...) = to_result(...).and_then { model _1 }
-
-      # run the block, translating any Exceptions into failures, if input: kwarg is passed, and is
-      # an I2w::Input, any errors will be added to that, and that is returned as the failure
-      #
-      # pass transaction: true to run the block inside a transaction
-      #
-      # Returns Result.success or Result.failure
-      def to_result(obj = nil, input: nil, transaction: false, &block)
-        obj = transaction ? self.transaction { rescue_as_failure(&block) } : rescue_as_failure(&block) if block
-        obj = Result.to_result(obj)
-
-        return obj if obj.success? || !input.respond_to?(:valid?)
-
-        Result.failure(input.tap { _1.errors = obj.errors })
       end
 
       private
