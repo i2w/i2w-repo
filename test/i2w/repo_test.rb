@@ -20,6 +20,14 @@ module I2w
 
     class UserRepo < Repo
       optional_list :posts, -> { order(:content) }
+
+      def create_with_posts(email:, name:, posts:)
+        model_result transaction: true do
+          user_record = UserRecord.create!(email: email, name: name)
+          posts = PostRepo.create_posts(*posts, user_id: user_record.id)
+          { **user_record, posts: posts }
+        end
+      end
     end
 
     class PostRepo < Repo
@@ -29,6 +37,12 @@ module I2w
       optional_list :reactions
 
       default_order 'content DESC'
+
+      def create_posts(*posts, user_id:)
+        list Result.value(transaction do
+          posts.map { PostRecord.create! user_id: user_id, content: _1 }
+        end)
+      end
 
       def all_for(user_id:)
         list scope.where(user_id: user_id)
@@ -154,6 +168,23 @@ module I2w
       next_user = UserRepo.with(:posts).find(next_user).value
       assert_equal [another_post, next_post], next_user.posts.to_a
       assert_equal [next_post, another_post], next_user.posts.reorder(content: :desc).to_a
+    end
+
+    test 'UserRepo#create_with_posts example (references Array list, other repo, nested transactions)' do
+      actual = UserRepo.create_with_posts(email: 'fred@email.com', name: 'Fred', posts: ['One', 'Two'])
+      assert actual.success?
+      assert_instance_of User, actual.value
+      assert_equal ['fred@email.com', 'Fred'], [actual.value.email, actual.value.name]
+      assert_equal ['One', 'Two'], actual.value.posts.order(:name).pluck(:content)
+
+      assert_equal UserRepo.all.count, 1
+      assert_equal PostRepo.all.count, 2
+
+      actual = UserRepo.with(:posts).create_with_posts(email: 'gary@email.com', name: 'Gary', posts: ['One', nil])
+      assert actual.failure?
+
+      assert_equal UserRepo.all.count, 1
+      assert_equal PostRepo.all.count, 2
     end
 
     test "Repo.default_order provides default order, unless overridden by List.order" do

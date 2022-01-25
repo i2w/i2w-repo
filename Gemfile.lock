@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/i2w/i2w-data_object.git
-  revision: 3988e5cc21798bd42df7b6edf74c9a5ce48cc341
+  revision: b3e4bc7e68c637827866c7d5b006f40ee5310f66
   branch: main
   specs:
     i2w-data_object (0.1.0)
@@ -8,7 +8,7 @@ GIT
 
 GIT
   remote: https://github.com/i2w/i2w-result.git
-  revision: 7b9e1a7ed9291c8c0deea118df754eea70fd9cb7
+  revision: 92d0edcab0bf30b3f359e8dad871fdaf9b781fda
   branch: main
   specs:
     i2w-result (0.1.0)
@@ -45,7 +45,7 @@ GEM
     minitest-server (1.0.6)
       minitest (~> 5.0)
     path_expander (1.1.0)
-    pg (1.2.3)
+    pg (1.3.0)
     pry (0.13.1)
       coderay (~> 1.1)
       method_source (~> 1.0)

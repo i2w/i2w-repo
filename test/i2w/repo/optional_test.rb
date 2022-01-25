@@ -110,7 +110,7 @@ module I2w
       actual = assert_raises I2w::DataObject::MissingAttributeError do
         FooRepo.find(1)
       end
-      assert_equal 'Missing attribute three', actual.message
+      assert_match %r{Missing attribute three}, actual.message
     end
 
     test 'optional attributes are by Repository.with(...)' do

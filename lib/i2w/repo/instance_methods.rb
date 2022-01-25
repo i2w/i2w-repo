@@ -34,7 +34,7 @@ module I2w
         result = nil
         ActiveRecord::Base.transaction(joinable: false, requires_new: true) do
           result = Result.to_result(&block)
-          raise ActiveRecord::Rollback
+          raise ActiveRecord::Rollback if result.failure?
         end
         result
       end

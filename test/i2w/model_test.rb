@@ -14,12 +14,12 @@ module I2w
 
     test 'raises an error if persisted model instantiated missing id, timestamps, and attributes' do
       error = assert_raises(DataObject::MissingAttributeError) { PersistedFoo.new }
-      assert_equal 'Missing attribute id, updated_at, created_at, name', error.message
+      assert_match %r{Missing attribute id, updated_at, created_at, name}, error.message
     end
 
     test 'raises an error if model instantiated missing attributes' do
       error = assert_raises(DataObject::MissingAttributeError) { Bar.new }
-      assert_equal 'Missing attribute name', error.message
+      assert_match %r{Missing attribute name}, error.message
     end
 
     test 'ActiveModel::Conversion for persisted model' do
