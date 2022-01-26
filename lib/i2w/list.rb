@@ -8,8 +8,8 @@ module I2w
   # Record::ToHash object.  Repository returns a List object from query methods setup with its model_class
   # and record_to_hash object.
   #
-  # By design, you can't perform any further queries using this object, or call any repository methods.  But you
-  # can pluck values, use #first and #last, and perform pagination using limit, count, offset and so on.
+  # By design, you can't perform many further queries using this object, or call any repository methods.  But you can,
+  # pluck values, #find, use #first and #last, and perform pagination using limit, count, offset and so on.
   #
   # You should use the repository to filter the models that are returned from the db, but in some cases you may want to
   # return a List object that allows filtering, but you should make these methods specific to your domain, and not
@@ -80,6 +80,8 @@ module I2w
       class_eval "def #{meth}(...) = new(source.#{meth}(...), default_order: nil)", __FILE__, __LINE__
     end
 
+    def find(pkey) = Result.to_result { model source.find(pkey) }
+
     def default_order(*args) = has_order? ? self : new(default_order: args)
 
     private
@@ -137,6 +139,14 @@ module I2w
       def offset(offset) = new(offset: offset)
 
       def exists? = resolved.size > 0
+
+      # TODO: need to be able to configure non id: pkey
+      def find(pkey)
+        Result.to_result do
+          record = resolved.find { _1.id == pkey } or raise RecordNotFound
+          model record
+        end
+      end
 
       delegate :size, :length, to: :resolved
 

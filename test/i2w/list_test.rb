@@ -84,6 +84,11 @@ module I2w
         assert list(&source).offset(10).last!.failure?
       end
 
+      test "#{desc} find" do
+        assert_equal zed, list(&source).find(zed.id).value
+        assert list(&source).find(-1).failure?
+      end
+
       test "#{desc} #pluck" do
         q = list(&source).order(:id)
 
