@@ -11,6 +11,7 @@ module I2w
       dependency :foo, -> { 'foo' }
       dependency :bar, 'bar', public: true
       dependency :input_class, class_lookup { _1.sub('::DependenciesTest::', '::Other::') + 'Input' }
+      dependency :broadcaster_class, class_lookup { "#{_1}Broadcaster" }.on_missing { "#{_1.sub(/::\w+\z/, '')}::Broadcaster" }
 
       attr_reader :arg, :kwarg
 
@@ -31,6 +32,10 @@ module I2w
     end
 
     class OtherRecord; end
+
+    class Broadcaster; end
+
+    class OtherBroadcaster; end
 
     test 'dependencies are available on the class level' do
       assert_equal 'foo', Base.send(:foo)
@@ -73,6 +78,11 @@ module I2w
       assert_raises(NoMethodError) { Base.new.send(:record_class) }
       assert_equal MissingClass.new('I2w::Other::OtherInput'), Other.new.send(:input_class)
       assert_equal OtherRecord, Other.new.send(:record_class)
+    end
+
+    test 'class_lookup can have #on_missing fallback' do
+      assert_equal Broadcaster, Base.send(:broadcaster_class)
+      assert_equal OtherBroadcaster, Other.send(:broadcaster_class)
     end
 
     test 'initialize is called correctly when overriding dependencies' do

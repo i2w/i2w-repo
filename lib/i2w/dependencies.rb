@@ -31,7 +31,7 @@ module I2w
       dependencies.add(dep, default)
     end
 
-    def class_lookup(...) = -> { ClassLookup.new(...).call(_1) }
+    def class_lookup(...) = ClassLookup.new(...)
 
     private
 
@@ -74,7 +74,7 @@ module I2w
 
       def keys = @container.keys
 
-      def add(name, default) = @container[name.to_sym] = Lazy.new(default)
+      def add(name, default) = @container[name.to_sym] = Lazy.to_lazy(default)
 
       def resolve(context, key) = @container.fetch(key).resolve(context)
 

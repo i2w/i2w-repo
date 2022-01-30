@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/i2w/i2w-data_object.git
-  revision: b3e4bc7e68c637827866c7d5b006f40ee5310f66
+  revision: 63d98e89ba179b1a01306c6faab45d28a924648a
   branch: main
   specs:
     i2w-data_object (0.1.0)
@@ -8,7 +8,7 @@ GIT
 
 GIT
   remote: https://github.com/i2w/i2w-result.git
-  revision: 92d0edcab0bf30b3f359e8dad871fdaf9b781fda
+  revision: 03f5585820e6fdad8a013a4bc0fa6d4c4fbe794b
   branch: main
   specs:
     i2w-result (0.1.0)
@@ -35,7 +35,7 @@ GEM
     byebug (11.1.3)
     coderay (1.1.3)
     concurrent-ruby (1.1.9)
-    i18n (1.8.11)
+    i18n (1.9.1)
       concurrent-ruby (~> 1.0)
     method_source (1.0.0)
     minitest (5.15.0)

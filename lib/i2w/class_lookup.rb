@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'i2w/no_arg'
+require 'i2w/lazy'
 
 require_relative 'missing_class'
 
@@ -10,13 +11,13 @@ module I2w
   # but will raise an error if any other methods are called on it.
   # You can specify multiple lookups, useful for looking up a specialized class, but falling back to a general class.
   class ClassLookup
-    class << self
-      def call(source, ...) = new(...).call(source)
+    include Lazy::Protocol
 
+    class << self
       def resolve(lookup)
         return lookup if lookup.is_a?(Class)
         lookup = new(lookup.to_s) unless lookup.is_a?(self)
-        lookup.call
+        lookup.resolve
       end
 
       alias [] resolve
@@ -29,7 +30,7 @@ module I2w
 
     def source(source) = tap { @source = source }
 
-    def call(source = NoArg)
+    def resolve(source = NoArg)
       raise ArgumentError, 'No lookups provided' if @lookups.size == 0
       source = @source if source == NoArg
       class_name = resolve_lookup(lookup, source)
@@ -40,7 +41,7 @@ module I2w
       missing = MissingClass.new(*@missing&.class_names, class_name)
 
       if lookups.size > 1
-        self.class.new(*lookups[1..]).source(source).missing(missing).call
+        self.class.new(*lookups[1..]).source(source).missing(missing).resolve
       else
         missing
       end

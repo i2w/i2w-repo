@@ -85,7 +85,7 @@ module I2w
     test 'default dependencies' do
       assert_equal User, UserRepo.model_class
       assert_equal UserRecord, UserRepo.record_class
-      assert_equal UserInput, ClassLookup.call(User) { _1 + 'Input' }
+      assert_equal UserInput, ClassLookup.new { _1 + 'Input' }.resolve(User)
     end
 
     test 'overridden dependencies' do

@@ -143,7 +143,7 @@ module I2w
       # TODO: need to be able to configure non id: pkey
       def find(pkey)
         Result.to_result do
-          record = resolved.find { _1.id == pkey } or raise RecordNotFound
+          record = resolved.find { _1.id == pkey.to_i } or raise RecordNotFound
           model record
         end
       end

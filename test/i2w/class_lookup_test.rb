@@ -12,48 +12,42 @@ module I2w
       class IndexAction; end
     end
 
-    test '.call examples' do
-      assert_equal FooRecord, ClassLookup.call(Foo) { _1 + 'Record' }
-      assert_equal FooRecord, ClassLookup.call(Foo.new) { _1 + 'Record' }
-      assert_equal FooRecord, ClassLookup.call(MissingClass.new('I2w::ClassLookupTest::Foo')) { _1 + 'Record' }
-      assert_equal FooRecord, ClassLookup.call(Foo) { _1.sub(/\z/, 'Record') }
-      assert_equal Foo,       ClassLookup.call(:foo) { "I2w::ClassLookupTest::#{_1.classify}" }
-      assert_equal Foo,       ClassLookup.call(FooRecord) { _1.sub 'Record', '' }
-      assert_equal Foo,       ClassLookup.call('I2w::ClassLookupTest::FoosRecord') { _1.sub('Record', '').singularize }
-      assert_equal Foo,       ClassLookup.call(Foos::IndexAction) { _1.deconstantize.singularize }
-      assert_equal FooRecord, ClassLookup.call(Foos::IndexAction) { _1.deconstantize.singularize + 'Record' }
-    end
-
     test '.new examples' do
-      assert_equal FooRecord, ClassLookup.new { _1 + 'Record' }.call(Foo)
-      assert_equal FooRecord, ClassLookup.new { "#{_1}Record" }.call('I2w::ClassLookupTest::Foo')
-      assert_equal Foo, ClassLookup.new { _1.deconstantize.singularize }.call(Foos::IndexAction)
-      assert_equal Foo, ClassLookup.new(-> { Nope }, Foo).call
-      assert_equal Foo, ClassLookup.new('Nope') { 'I2w::ClassLookupTest::Foo' }.call
+      assert_equal FooRecord, ClassLookup.new { _1 + 'Record' }.resolve(Foo)
+      assert_equal FooRecord, ClassLookup.new { "#{_1}Record" }.resolve('I2w::ClassLookupTest::Foo')
+      assert_equal Foo, ClassLookup.new { _1.deconstantize.singularize }.resolve(Foos::IndexAction)
+      assert_equal Foo, ClassLookup.new(-> { Nope }, Foo).resolve
+      assert_equal Foo, ClassLookup.new('Nope') { 'I2w::ClassLookupTest::Foo' }.resolve
 
-      error = assert_raises(ArgumentError) { ClassLookup.new.call }
+      error = assert_raises(ArgumentError) { ClassLookup.new.resolve }
       assert_equal "No lookups provided", error.message
 
-      error = assert_raises(ArgumentError) { ClassLookup.new('Nope', -> { _1 }).call }
+      error = assert_raises(ArgumentError) { ClassLookup.new('Nope', -> { _1 }).resolve }
       assert_match(/source required for lookup/, error.message)
 
-      assert_equal MissingClass.new('No', 'NilClassNo'), ClassLookup.new('No', -> { "#{_1}No" }).source(nil).call
+      assert_equal MissingClass.new('No', 'NilClassNo'), ClassLookup.new('No', -> { "#{_1}No" }).source(nil).resolve
+    end
+
+    test 'implements Lazy::Protocol' do
+      actual = ClassLookup.new { _1 + 'Record' }
+      assert_equal actual, Lazy.to_lazy(actual)
+      assert_equal FooRecord, Lazy.resolve(actual, Foo)
     end
 
     test 'on_missing' do
-      assert_equal FooRecord, ClassLookup.new { _1 + 'Record' }.on_missing { FooRecord }.call('Bar')
-      assert_equal FooRecord, ClassLookup.call('Bar', -> { _1 + 'Record' }, -> { FooRecord })
-      assert_equal Foo, ClassLookup.new(&:upcase).on_missing(&:downcase).on_missing { Foo }.call(FooRecord)
+      assert_equal FooRecord, ClassLookup.new { _1 + 'Record' }.on_missing { FooRecord }.resolve('Bar')
+      assert_equal FooRecord, ClassLookup.new( -> { _1 + 'Record' }, -> { FooRecord }).resolve('Bar')
+      assert_equal Foo, ClassLookup.new(&:upcase).on_missing(&:downcase).on_missing { Foo }.resolve(FooRecord)
     end
 
     test 'Missing class' do
-      actual = ClassLookup.call(Foo) { _1 + 'Floopy' }
+      actual = ClassLookup.new { _1 + 'Floopy' }.resolve(Foo)
       assert_equal MissingClass.new('I2w::ClassLookupTest::FooFloopy'), actual
       assert_equal 'I2w::ClassLookupTest::FooFloopy', actual.to_s
     end
 
     test 'Missing class keeps track of all attempts' do
-      actual = ClassLookup.new { 'Foo' }.on_missing { 'Bar' }.call('X')
+      actual = ClassLookup.new { 'Foo' }.on_missing { 'Bar' }.resolve('X')
       assert_equal MissingClass.new('Foo', 'Bar'), actual
       assert_equal 'Bar', actual.to_s
       assert_equal '#<Missing class: Bar (also tried: Foo)>', actual.inspect
@@ -64,7 +58,7 @@ module I2w
 
       string = "#{self.class.name}::Thing"
       lookup = ClassLookup.new { Thing }
-      missing = ClassLookup.call(nil) { Thing }
+      missing = ClassLookup.new { Thing }.resolve
 
       assert_equal MissingClass.new("#{self.class.name}::Thing"), ClassLookup.resolve(string)
       assert_equal MissingClass.new("#{self.class.name}::Thing"), ClassLookup.resolve(lookup)
