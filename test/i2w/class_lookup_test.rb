@@ -13,11 +13,12 @@ module I2w
     end
 
     test '.new examples' do
-      assert_equal FooRecord, ClassLookup.new { _1 + 'Record' }.resolve(Foo)
-      assert_equal FooRecord, ClassLookup.new { "#{_1}Record" }.resolve('I2w::ClassLookupTest::Foo')
-      assert_equal Foo, ClassLookup.new { _1.deconstantize.singularize }.resolve(Foos::IndexAction)
-      assert_equal Foo, ClassLookup.new(-> { Nope }, Foo).resolve
-      assert_equal Foo, ClassLookup.new('Nope') { 'I2w::ClassLookupTest::Foo' }.resolve
+      assert_equal FooRecord,         ClassLookup.new { _1 + 'Record' }.resolve(Foo)
+      assert_equal FooRecord,         ClassLookup.new { "#{_1}Record" }.resolve('I2w::ClassLookupTest::Foo')
+      assert_equal Foo,               ClassLookup.new { _1.deconstantize.singularize }.resolve(Foos::IndexAction)
+      assert_equal Foo,               ClassLookup.new(-> { Nope }, Foo).resolve
+      assert_equal Foo,               ClassLookup.new('Nope') { 'I2w::ClassLookupTest::Foo' }.resolve
+      assert_equal Foos::IndexAction, ClassLookup.new { _1 + '::IndexAction' }.resolve(Foos)
 
       error = assert_raises(ArgumentError) { ClassLookup.new.resolve }
       assert_equal "No lookups provided", error.message

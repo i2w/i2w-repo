@@ -63,11 +63,11 @@ module I2w
     private
 
     def resolve_lookup(lookup, source)
-      return lookup if [Symbol, String, Class, MissingClass].include?(lookup.class)
+      return lookup if [Symbol, String, Module, Class, MissingClass].include?(lookup.class)
       return lookup.call if lookup.arity == 0
       raise ArgumentError, "source required for lookup: #{lookup}" if source == NoArg
 
-      source = source.class unless [Symbol, String, Class, MissingClass].include?(source.class)
+      source = source.class unless [Symbol, String, Module, Class, MissingClass].include?(source.class)
       lookup.call source.to_s
     end
   end
