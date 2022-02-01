@@ -41,24 +41,37 @@ module I2w
     end
 
     def define_dependency_readers(dep, public, class_only)
-      class_eval "def self.#{dep} = @#{dep} ||= dependencies.resolve(self, :#{dep})", __FILE__, __LINE__
+      class_eval <<~end_ruby, __FILE__, __LINE__
+        def self.#{dep}
+          defined?(@#{dep}) ? @#{dep} : @dep = dependencies.resolve(self, :#{dep})
+        end
+      end_ruby
+
       private_class_method dep unless public
 
       unless class_only
-        class_eval "def #{dep} = @#{dep} || self.class.send(:#{dep})", __FILE__, __LINE__
+        class_eval <<~end_ruby, __FILE__, __LINE__
+          def #{dep}
+            defined?(@#{dep}) ? @#{dep} : self.class.send(:#{dep})
+          end
+        end_ruby
         private dep unless public
       end
     end
 
-    # module prepend to override dependencies on our instance if they are passed as kwargs, and if instance
-    # readers have been defined for those dependencies
+    # module prepend to override dependencies on our instance if they are passed as kwargs.
+    # We only set the dependency if there is an instance reader for it.
     module Override
       def initialize(*args, **kwargs)
-        overridden = self.class.dependencies.keys.select do
-          instance_variable_set("@#{_1}", kwargs[_1]) if kwargs.key?(_1) && respond_to?(_1, true)
-        end
+        kwargs.slice(*overridable_dependencies).each { instance_variable_set "@#{_1}", _2 }
 
-        super(*args, **kwargs.except(*overridden))
+        super(*args, **kwargs.except(*overridable_dependencies))
+      end
+
+      private
+
+      def overridable_dependencies
+        @overridable_dependencies ||= self.class.dependencies.keys.select { respond_to?(_1, true) }
       end
     end
 

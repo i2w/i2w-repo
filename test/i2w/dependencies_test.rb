@@ -91,6 +91,10 @@ module I2w
       assert_equal 'default arg', actual.arg
       assert_equal 'default kwarg', actual.kwarg
 
+      actual = Other.new(bar: nil, kwarg: 'X')
+      assert_nil actual.bar
+      assert_equal 'X', actual.kwarg
+
       actual = Other.new(9, kwarg: 'X', bar: 'BIG BAR')
       assert_equal 'BIG BAR', actual.bar
       assert_equal 9, actual.arg
