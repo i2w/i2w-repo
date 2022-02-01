@@ -103,7 +103,7 @@ module I2w
       def new_scope(new_scope, &block)
         if new_scope.is_a?(List)
           new_scope = new_scope.send(:source)
-        else
+        elsif new_scope.respond_to?(:arity)
           new_scope = new_scope.arity == 1 ? new_scope.call(@scope) : @scope.instance_exec(&new_scope)
         end
 
