@@ -68,6 +68,9 @@ module I2w
         kwargs.slice(*overridable).each { instance_variable_set "@#{_1}", _2 }
 
         super(*args, **kwargs.except(*overridable))
+
+      rescue ArgumentError => e
+        raise ArgumentError, "#{e.message} (overridable dependencies are: #{overridable.map(&:inspect).join(', ')})"
       end
     end
 

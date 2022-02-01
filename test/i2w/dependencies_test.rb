@@ -100,9 +100,11 @@ module I2w
       assert_equal 9, actual.arg
       assert_equal 'X', actual.kwarg
 
-      assert_raises ArgumentError do
+      e = assert_raises ArgumentError do
         Other.new(9, kwarg: 'X', bar: 'BIG BAR', unknown: 'x')
       end
+
+      assert_equal "unknown keyword: :unknown (overridable dependencies are: :foo, :bar, :input_class, :broadcaster_class, :record_class)", e.message
     end
 
     test 'Dependencies::Container #resolve and #set_instance_variables!' do
