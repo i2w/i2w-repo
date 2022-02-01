@@ -59,7 +59,7 @@ module I2w
     alias to_hash attributes
     alias to_h attributes
 
-    delegate :[], to: :attributes_hash
+    delegate :[], to: :attributes
 
     def persisted? = false
 

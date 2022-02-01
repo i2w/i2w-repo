@@ -30,8 +30,9 @@ module I2w
       refute input.valid?
       assert_raises(Input::InvalidAttributesError) { input.attributes }
       assert_raises(Input::InvalidAttributesError) { { **input } }
+      assert_raises(Input::InvalidAttributesError) { input[:foo] }
       assert_equal({ foo: 'baa baa black sheep', faz: nil }, input.attributes_hash)
-      assert_equal 'baa baa black sheep', input[:foo]
+      assert_equal('baa baa black sheep', input.attributes_hash[:foo])
     end
 
     test 'unknown, empty or partial input via #new creates an Input' do

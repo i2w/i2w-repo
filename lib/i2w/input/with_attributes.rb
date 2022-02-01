@@ -19,6 +19,8 @@ module I2w
       alias to_h attributes
       alias to_hash attributes
 
+      delegate :[], to: :attributes
+
       alias delegator_class class
 
       def class = __getobj__.class
