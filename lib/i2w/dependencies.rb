@@ -63,15 +63,11 @@ module I2w
     # We only set the dependency if there is an instance reader for it.
     module Override
       def initialize(*args, **kwargs)
-        kwargs.slice(*overridable_dependencies).each { instance_variable_set "@#{_1}", _2 }
+        overridable = self.class.dependencies.keys.select { respond_to?(_1, true) }
 
-        super(*args, **kwargs.except(*overridable_dependencies))
-      end
+        kwargs.slice(*overridable).each { instance_variable_set "@#{_1}", _2 }
 
-      private
-
-      def overridable_dependencies
-        @overridable_dependencies ||= self.class.dependencies.keys.select { respond_to?(_1, true) }
+        super(*args, **kwargs.except(*overridable))
       end
     end
 
