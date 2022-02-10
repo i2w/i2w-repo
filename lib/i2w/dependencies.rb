@@ -63,7 +63,7 @@ module I2w
     # We only set the dependency if there is an instance reader for it.
     module Override
       def initialize(*args, **kwargs)
-        overridable = self.class.dependencies.names.select { respond_to?(_1, true) }
+        overridable = self.class.dependencies.keys.select { respond_to?(_1, true) }
 
         kwargs.slice(*overridable).each { instance_variable_set "@#{_1}", _2 }
 
@@ -84,13 +84,13 @@ module I2w
         @container = source.instance_variable_get(:@container).dup
       end
 
-      def names = @container.keys
+      delegate :keys, :each_key, to: :@container
 
       def add(name, default) = @container[name.to_sym] = Lazy.to_lazy(default)
 
       def resolve(context, key) = @container.fetch(key).resolve(context)
 
-      def resolve_all(context) = names.to_h { [_1, resolve(context, _1)] }
+      def resolve_all(context) = keys.to_h { [_1, resolve(context, _1)] }
     end
   end
 end

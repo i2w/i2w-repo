@@ -129,7 +129,7 @@ module I2w
       container.add :e, -> { var_in_outer_scope }
       container.add :f, 'hello'
 
-      assert_equal [:a, :b, :c, :d, :e, :f], container.names
+      assert_equal [:a, :b, :c, :d, :e, :f], container.keys
 
       resolved = container.resolve_all(instance)
 
