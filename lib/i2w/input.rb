@@ -32,6 +32,8 @@ module I2w
         return unless record_class?
 
         record_class.attribute_types[attr.to_s] if record_class.attribute_types.include?(attr.to_s)
+      rescue ActiveRecord::StatementInvalid
+        # if we can't lookup the record - TODO: delay this?
       end
     end
 
