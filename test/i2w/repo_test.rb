@@ -238,6 +238,12 @@ module I2w
       assert_equal 0, UserRepo.all.count
     end
 
+    test 'Repo.transaction does not swallow non failure exceptions' do
+      assert_raises NoMethodError do
+        Repo.transaction { Object.new.foo }
+      end
+    end
+
     test 'Repo#to_result transaction: true' do
       Repo.to_result transaction: true do
         user = UserRecord.create!(email: 'abe@email.com')

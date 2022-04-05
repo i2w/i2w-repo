@@ -33,7 +33,7 @@ module I2w
       def transaction(&block)
         result = nil
         ActiveRecord::Base.transaction(joinable: false, requires_new: true) do
-          result = Result.to_result(&block)
+          result = Result.to_result(block.call)
           raise ActiveRecord::Rollback if result.failure?
         end
         result
